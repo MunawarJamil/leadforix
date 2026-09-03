@@ -1,0 +1,131 @@
+http:
+  routers:
+    agent-service:
+      rule: "PathPrefix(`/api/agent`)"
+      middlewares:
+        - agent-strip
+      service: agent-service
+
+    auth-service:
+      rule: "PathPrefix(`/api/auth`)"
+      middlewares:
+        - auth-strip
+      service: auth-service
+
+    campaign-service:
+      rule: "PathPrefix(`/api/campaign`)"
+      middlewares:
+        - campaign-strip
+      service: campaign-service
+
+    knowledge-service:
+      rule: "PathPrefix(`/api/knowledge`)"
+      middlewares:
+        - knowledge-strip
+      service: knowledge-service
+
+    lead-service:
+      rule: "PathPrefix(`/api/lead`)"
+      middlewares:
+        - lead-strip
+      service: lead-service
+
+    outreach-service:
+      rule: "PathPrefix(`/api/outreach`)"
+      middlewares:
+        - outreach-strip
+      service: outreach-service
+
+    research-service:
+      rule: "PathPrefix(`/api/research`)"
+      middlewares:
+        - research-strip
+      service: research-service
+
+    workspace-service:
+      rule: "PathPrefix(`/api/workspace`)"
+      middlewares:
+        - workspace-strip
+      service: workspace-service
+
+  middlewares:
+    agent-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/agent"
+
+    auth-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/auth"
+
+    campaign-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/campaign"
+
+    knowledge-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/knowledge"
+
+    lead-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/lead"
+
+    outreach-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/outreach"
+
+    research-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/research"
+
+    workspace-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/workspace"
+
+  services:
+    agent-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8001"
+
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8002"
+
+    campaign-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8003"
+
+    knowledge-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8004"
+
+    lead-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8005"
+
+    outreach-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8006"
+
+    research-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8007"
+
+    workspace-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8008"

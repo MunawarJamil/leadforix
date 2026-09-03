@@ -1,0 +1,12 @@
+services:
+  traefik:
+    image: traefik:v3.5
+    container_name: leadforix-traefik
+
+    ports:
+      - "80:80"
+      - "8080:8080"
+
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
