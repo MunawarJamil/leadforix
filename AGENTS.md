@@ -187,7 +187,7 @@ For infra changes: verify actual runtime behavior, not just config syntax.
 
 ## 24. Current Status — Day 01 Complete
 
-See `PROGRESS.md` for live task tracking and session handover details.
+**Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
 **Done**: Monorepo structure, 8 FastAPI services scaffolded with Clean Architecture, entrypoints inside `app/main.py`, root Python config with `uv`, environment strategy (`.env.example`, `.gitignore`), linting/formatting with `ruff`, unit test suite with `pytest` verifying all 8 `/health` endpoints pass, Traefik dynamic routing configured.
 
