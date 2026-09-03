@@ -185,10 +185,10 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Day 01 Complete
+## 24. Current Status — Day 02 Complete
 
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
-**Done**: Monorepo structure, 8 FastAPI services scaffolded with Clean Architecture, entrypoints inside `app/main.py`, root Python config with `uv`, environment strategy (`.env.example`, `.gitignore`), linting/formatting with `ruff`, unit test suite with `pytest` verifying all 8 `/health` endpoints pass, Traefik dynamic routing configured.
+**Done**: Monorepo structure & Clean Architecture for all 8 microservices, environment strategy, tooling (`uv`, `ruff`, `pytest`), full Docker Compose stack under `infrastructure/docker-compose.yml` (PostgreSQL 16, Redis 7, Qdrant, Traefik gateway v3.5, 8 containerized FastAPI services, Celery worker foundation, persistent volumes, and internal bridge networking).
 
-**Next**: Day 02 ticket.
+**Next**: Day 03 ticket.

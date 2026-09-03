@@ -93,39 +93,39 @@ http:
     agent-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8001"
+          - url: "http://agent_service:8001"
 
     auth-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8002"
+          - url: "http://auth_service:8002"
 
     campaign-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8003"
+          - url: "http://campaign_service:8003"
 
     knowledge-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8004"
+          - url: "http://knowledge_service:8004"
 
     lead-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8005"
+          - url: "http://lead_service:8005"
 
     outreach-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8006"
+          - url: "http://outreach_service:8006"
 
     research-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8007"
+          - url: "http://research_service:8007"
 
     workspace-service:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:8008"
+          - url: "http://workspace_service:8008"

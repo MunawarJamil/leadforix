@@ -5,7 +5,9 @@ description = "Leadforix AI Sales Platform"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "celery>=5.6.3",
     "fastapi[standard]>=0.116.1",
+    "redis>=8.1.0",
 ]
 
 [tool.uv]

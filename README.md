@@ -73,15 +73,16 @@ cd apps/services/<service_name>/app
 python main.py
 ```
 
-Start gateway (from repo root):
+Start full stack (from repo root):
 
 ```bash
-docker compose -f infrastructure/api_gateway/docker-compose.yml up -d
+docker compose -f infrastructure/docker-compose.yml --env-file .env up -d --build
 ```
 
 Gateway: `http://localhost` · Traefik dashboard: `http://localhost:8080`
+Postgres: `localhost:5432` · Redis: `localhost:6379` · Qdrant: `http://localhost:6333`
 
-> During this phase, FastAPI services run on the host; Traefik runs in Docker and reaches them via `host.docker.internal`. This will move to a shared Docker network once services are containerized.
+> All services and infrastructure run containerized on the internal `leadforix-network` bridge network. Traefik serves as the single external gateway and routes to services via internal Docker DNS. Mounted volumes allow local hot reloading during development.
 
 ## Engineering Principles
 

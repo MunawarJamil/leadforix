@@ -1,0 +1,148 @@
+name: leadforix
+
+networks:
+  leadforix-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+
+x-service-base: &service-base
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  volumes:
+    - ../apps:/app/apps
+    - ../shared:/app/shared
+    - ../infrastructure:/app/infrastructure
+  environment:
+    DATABASE_URL: postgresql://${POSTGRES_USER:-leadforix}:${POSTGRES_PASSWORD:-leadforix}@postgres:5432/${POSTGRES_DB:-leadforix}
+    REDIS_URL: redis://redis:6379/0
+    CELERY_BROKER_URL: redis://redis:6379/0
+    CELERY_RESULT_BACKEND: redis://redis:6379/0
+    QDRANT_URL: http://qdrant:6333
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - leadforix-network
+
+services:
+  # ---------------- Traefik Gateway ----------------
+  traefik:
+    image: traefik:v3.5
+    container_name: leadforix-traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./api_gateway/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./api_gateway/traefik/dynamic:/etc/traefik/dynamic:ro
+    networks:
+      - leadforix-network
+    depends_on:
+      - auth_service
+      - workspace_service
+      - lead_service
+      - campaign_service
+      - agent_service
+      - research_service
+      - knowledge_service
+      - outreach_service
+
+  # ---------------- Infrastructure ----------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: leadforix-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-leadforix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-leadforix}
+      POSTGRES_DB: ${POSTGRES_DB:-leadforix}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - leadforix-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-leadforix} -d ${POSTGRES_DB:-leadforix}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: leadforix-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - leadforix-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.2
+    container_name: leadforix-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - leadforix-network
+
+  # ---------------- Celery Worker ----------------
+  celery_worker:
+    <<: *service-base
+    container_name: leadforix-celery-worker
+    command: ["celery", "-A", "infrastructure.messaging.celery_app.celery_app", "worker", "--loglevel=info"]
+
+  # ---------------- FastAPI Services ----------------
+  agent_service:
+    <<: *service-base
+    container_name: leadforix-agent-service
+    command: ["uvicorn", "apps.services.agent_service.app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+
+  auth_service:
+    <<: *service-base
+    container_name: leadforix-auth-service
+    command: ["uvicorn", "apps.services.auth_service.app.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]
+
+  campaign_service:
+    <<: *service-base
+    container_name: leadforix-campaign-service
+    command: ["uvicorn", "apps.services.campaign_service.app.main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]
+
+  knowledge_service:
+    <<: *service-base
+    container_name: leadforix-knowledge-service
+    command: ["uvicorn", "apps.services.knowledge_service.app.main:app", "--host", "0.0.0.0", "--port", "8004", "--reload"]
+
+  lead_service:
+    <<: *service-base
+    container_name: leadforix-lead-service
+    command: ["uvicorn", "apps.services.lead_service.app.main:app", "--host", "0.0.0.0", "--port", "8005", "--reload"]
+
+  outreach_service:
+    <<: *service-base
+    container_name: leadforix-outreach-service
+    command: ["uvicorn", "apps.services.outreach_service.app.main:app", "--host", "0.0.0.0", "--port", "8006", "--reload"]
+
+  research_service:
+    <<: *service-base
+    container_name: leadforix-research-service
+    command: ["uvicorn", "apps.services.research_service.app.main:app", "--host", "0.0.0.0", "--port", "8007", "--reload"]
+
+  workspace_service:
+    <<: *service-base
+    container_name: leadforix-workspace-service
+    command: ["uvicorn", "apps.services.workspace_service.app.main:app", "--host", "0.0.0.0", "--port", "8008", "--reload"]
