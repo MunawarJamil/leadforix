@@ -5,9 +5,13 @@ description = "Leadforix AI Sales Platform"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "alembic>=1.19.1",
+    "asyncpg>=0.31.0",
     "celery>=5.6.3",
     "fastapi[standard]>=0.116.1",
+    "pydantic-settings>=2.15.0",
     "redis>=8.1.0",
+    "sqlalchemy>=2.0.52",
 ]
 
 [tool.uv]
@@ -16,6 +20,7 @@ package = false
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.9.0",
 ]
 
@@ -41,3 +46,4 @@ indent-style = "space"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+asyncio_mode = "auto"

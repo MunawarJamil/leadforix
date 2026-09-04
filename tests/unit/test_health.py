@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -24,9 +26,14 @@ SERVICES = [
 
 @pytest.mark.parametrize("service_name,app", SERVICES)
 def test_service_health(service_name: str, app):
-    client = TestClient(app)
-    response = client.get("/health")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "ok"
-    assert data["service"] == service_name
+    """
+    Verify that all 8 microservices expose a responsive /health endpoint.
+    Mocks live database probe to allow offline unit tests to pass deterministically.
+    """
+    with patch("apps.services.auth_service.app.main.ping_database", return_value=True):
+        client = TestClient(app)
+        response = client.get("/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert data["service"] == service_name
