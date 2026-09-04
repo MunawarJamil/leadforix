@@ -7,7 +7,7 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Ticket**: Day 02 — Docker & Infrastructure Foundation
+- **Current Ticket**: Day 03 — Database Foundation & Shared Backend Infrastructure
 - **Status**: Completed
 
 ---
@@ -25,49 +25,55 @@ Any AI model or developer starting a new chat session should read this file firs
   - `research_service` (port 8007, `/api/research`)
   - `workspace_service` (port 8008, `/api/workspace`)
 - [x] **Clean Architecture Directories**: Each service has `app/{api, application, domain, infrastructure}` and `test/`.
-- [x] **Shared & Infra Stubs**: `shared/` (`config`, `database`, `exceptions`, `logging`, `utils`) and `infrastructure/` (`database`, `messaging`, `redis`, `vector_db`).
 - [x] **API Gateway (Traefik v3.5)**:
   - `infrastructure/api_gateway/traefik/traefik.yml` (ports 80 & 8080 dashboard)
   - `infrastructure/api_gateway/traefik/dynamic/routes.yml` configured with internal Docker service routing.
 - [x] **Day 02 Stack & Infrastructure**:
   - Unified `Dockerfile` and `.dockerignore` configured with `python:3.14-slim` and `uv`.
   - Celery worker foundation (`infrastructure/messaging/celery_app.py`).
-  - Centralized `infrastructure/docker-compose.yml` defining:
-    - PostgreSQL 16 (`leadforix-postgres`, volume `postgres_data`, healthcheck)
-    - Redis 7 (`leadforix-redis`, volume `redis_data`, healthcheck)
-    - Qdrant v1.13.2 (`leadforix-qdrant`, volume `qdrant_data`)
-    - Traefik v3.5 (`leadforix-traefik`, ports 80/8080)
-    - 8 FastAPI microservices with code hot reload mounts
-    - Celery worker foundation connected to Redis
-  - Dedicated internal bridge network `leadforix-network` with Docker DNS.
-  - Persistent named volumes verified across container restarts.
+  - Centralized `infrastructure/docker-compose.yml` with PostgreSQL 16, Redis 7, Qdrant, Traefik, and 8 FastAPI microservices.
+  - Dedicated bridge network `leadforix-network` with Docker DNS and persistent named volumes.
+- [x] **Day 03 Database Foundation & Shared Infrastructure**:
+  - Installed `sqlalchemy>=2.0.52`, `asyncpg>=0.31.0`, `alembic>=1.19.1`, `pydantic-settings>=2.15.0`, `pytest-asyncio>=1.4.0`.
+  - Shared database config with automatic dialect normalization (`postgresql+asyncpg://`) and connection pool tuning (`shared/config/database.py`).
+  - Declarative Base with `AsyncAttrs`, `UUIDPrimaryKeyMixin`, and `TimestampMixin` (`shared/database/base.py`).
+  - Async engine, session factory, transaction context manager, and ping utility (`shared/database/session.py`).
+  - Async migrations foundation with Alembic (`alembic.ini`, `infrastructure/database/alembic/`).
+  - Common domain/DB exception hierarchy and standard FastAPI JSON error handlers (`shared/exceptions/`).
+  - Structured JSON logging foundation emitting to stdout (`shared/logging/logger.py`).
+  - Live PostgreSQL connectivity check and structured logging wired into `auth_service` (`apps/services/auth_service/app/main.py`).
+  - Comprehensive unit test suite in `tests/unit/` (17/17 tests passing).
 
 ---
 
 ## 3. Key Decisions & Architectural Rules
 
-1. **`main.py` Location**: The entry point belongs at `<service>/app/main.py` per Clean Architecture and `AGENTS.md` Section 5.
-2. **Gateway Traefik Routing**: Traefik strips the `/api/<service>` prefix before forwarding requests to the service root via internal Docker service DNS (e.g. `/api/auth/health` -> `http://auth_service:8002/health`).
-3. **No Premature Feature Work**: Do not implement auth logic, database migrations, LangGraph chains, or campaigns until the current ticket explicitly calls for it.
-4. **Folder Naming**: Service folders follow `snake_case` (e.g. `workspace_service`).
-5. **Infrastructure Centralization**: All compose files reside under `infrastructure/` per `AGENTS.md` Rule 9.
+1. **`main.py` Location**: Entry point belongs at `<service>/app/main.py` per Clean Architecture.
+2. **AsyncIO Native**: All database interactions use SQLAlchemy 2.0 async engine and `asyncpg`. Standard `postgresql://` URLs in `.env` are automatically normalized.
+3. **Connection Pooling**: Pre-ping is enabled by default to drop dead sockets cleanly.
+4. **Service Isolation**: No cross-service database access. Models and services inherit from shared base abstractions without referencing another service's tables.
+5. **Standardized Errors (Rule 17)**: DB connection failures return `503 DATABASE_CONNECTION_ERROR` without leaking SQL syntax or connection strings to callers.
+6. **Structured Logging**: Services emit JSON logs to `sys.stdout` for container observability.
 
 ---
 
-## 4. Current Status — Day 02 Done
+## 4. Current Status — Day 03 Done
 
-**Day 02 Acceptance Criteria Achieved:**
-- `docker compose up` builds and starts complete backend infrastructure (13 containers running).
-- Internal DNS networking allows Traefik and services to communicate cleanly without exposing service ports.
-- PostgreSQL, Redis, and Qdrant are accessible and passing healthchecks.
-- Traefik routes `/api/<service>/health` correctly to all 8 microservices.
-- Data persistence across container restarts verified for PostgreSQL and Redis.
+**Day 03 Acceptance Criteria Achieved:**
+- Services can connect to PostgreSQL using async engine & session factories.
+- Database migrations foundation established with async Alembic (`alembic heads` succeeds).
+- Transactions work correctly with auto-commit and rollback on error.
+- Database connection failures are handled cleanly (`ping_database` returns `False` safely; API returns 503 without leaking stack details).
+- No service directly depends on another service's internal database code.
+- 17 unit tests passing across services, database, and exception layers.
 
 ---
 
-## 5. Immediate Next Steps (Day 03 Preview)
+## 5. Immediate Next Steps (Day 04 Preview)
 
-Ready for **DAY-03** requirements.
+Ready for **DAY-04** requirements.
+
+---
 
 ## 6. Session Handover Instructions for New Chats
 

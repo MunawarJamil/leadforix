@@ -185,10 +185,11 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Day 02 Complete
+## 24. Current Status — Day 03 Complete
 
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
-**Done**: Monorepo structure & Clean Architecture for all 8 microservices, environment strategy, tooling (`uv`, `ruff`, `pytest`), full Docker Compose stack under `infrastructure/docker-compose.yml` (PostgreSQL 16, Redis 7, Qdrant, Traefik gateway v3.5, 8 containerized FastAPI services, Celery worker foundation, persistent volumes, and internal bridge networking).
+**Done**: Monorepo structure & Clean Architecture for all 8 microservices, environment strategy, tooling (`uv`, `ruff`, `pytest`), full Docker Compose stack under `infrastructure/docker-compose.yml`, Celery worker foundation, async PostgreSQL engine & connection pooling (`asyncpg`, `SQLAlchemy 2.0`), Alembic async migration foundation, shared declarative base & mixins, transaction context managers, unified exception handling & API error conventions, structured JSON logging, and comprehensive unit tests (17 passed).
 
-**Next**: Day 03 ticket.
+**Next**: Day 04 ticket.
+
