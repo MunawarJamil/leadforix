@@ -84,3 +84,11 @@ The agent must:
 1. Read this file ([PROGRESS.md](file:///e:/PERSONAL-PROJECTS/leadforix/PROGRESS.md)) and [AGENTS.md](file:///e:/PERSONAL-PROJECTS/leadforix/AGENTS.md).
 2. Check section **4. Immediate Next Steps** above.
 3. State the immediate task to the user and proceed with that single step. Do not re-explore the repository from scratch.
+4. Follow the step-by-step workflow:
+   - **Step 0**: Suggest creating a new branch in chat (`feat/lf-XX-task-name`), do not create it directly.
+   - Explain task and flow concisely with a short plan -> propose Step 1 -> wait for approval (`done`).
+   - Guide what/where/why (no direct code edits unless explicitly requested).
+   - Once verified, provide a meaningful conventional commit message.
+5. Synchronize with Mem0 MCP memory upon task completion.
+
+

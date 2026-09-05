@@ -21,12 +21,16 @@ Leadforix is an AI-powered SDR platform (prospect research, lead scoring, person
 
 If a request conflicts with an existing architectural decision, **state the conflict and ask before changing the architecture** — don't silently override it.
 
-## 2. Working Style
+## 2. Working Style & Engineering Guidelines
 
-- One logical step at a time when working interactively; wait for confirmation before proceeding.
-- Never jump ahead to future tickets/days.
-- Keep changes focused and reviewable — don't mix refactors with feature work.
-- Explain _why_ before making an architectural change.
+- **Step-by-step only**: Work incrementally, one step at a time. Never do everything at once or jump ahead to future tickets.
+- **No autonomous code modifications unless explicitly requested**: Do not write or edit codebase files directly unless the user explicitly requests you to do the implementation. First, understand the task carefully, explain the task and data flow concisely in chat with a short plan, and propose Step 1. Wait for the user's approval (`done`). Then tell the user what to do, where, and the short rationale why.
+- **Senior Architect Quality**: Code must be mature, highly scalable, and production-grade for multi-tenant high-throughput systems.
+- **Educational Annotations & Design Patterns**: When providing code snippets, add concise comments explaining what functions/classes do, explicitly identifying engineering principles and design patterns (e.g., Abstraction, Encapsulation, Dependency Injection, Repository, Factory, Singleton) to teach foundational software engineering.
+- **Step 0 Branch Suggestion**: When starting any new task, Step 0 is always to suggest creating a new branch in chat (format: `feat/lf-XX-short-description`, e.g., `feat/lf-03-database-foundations`). Do not create it directly; suggest the exact git command for the user to run.
+- **Meaningful Commit Messages**: After completing the implementation and verification of a task, always provide a proper, meaningful conventional commit message summarizing the changes.
+- **Session Handover & Memory Updates**: When finishing a task or pausing for later, update `PROGRESS.md`, `AGENTS.md`, and the Mem0 MCP memory.
+
 
 ## 3. Request Flow
 
