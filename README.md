@@ -73,14 +73,51 @@ cd apps/services/<service_name>/app
 python main.py
 ```
 
-Start full stack (from repo root):
+### Running with Docker (Selective vs Full Stack)
 
+We use Docker Compose profiles so you don't have to run all 8 services simultaneously.
+
+**1. Run Only What You Need (Core Infra + Specific Service)**:
 ```bash
-docker compose -f infrastructure/docker-compose.yml --env-file .env up -d --build
+# Start Traefik, Postgres, Redis + Auth Service only
+docker compose -f infrastructure/docker-compose.yml up -d traefik auth_service
+
+# Start any other service on demand (e.g. Lead Service)
+docker compose -f infrastructure/docker-compose.yml up -d traefik lead_service
 ```
 
-Gateway: `http://localhost` · Traefik dashboard: `http://localhost:8080`
-Postgres: `localhost:5432` · Redis: `localhost:6379` · Qdrant: `http://localhost:6333`
+**2. Start Full Stack (All 8 Services + Celery + Infra)**:
+```bash
+docker compose -f infrastructure/docker-compose.yml --profile full up -d
+```
+
+**3. Stop Services**:
+```bash
+# Stop running services
+docker compose -f infrastructure/docker-compose.yml down
+
+# If started with --profile full:
+docker compose -f infrastructure/docker-compose.yml --profile full down
+```
+
+**4. Useful Docker Commands**:
+```bash
+# View live logs for a service
+docker logs -f leadforix-auth-service
+
+# Inspect Postgres tables interactively via psql
+docker exec -it leadforix-postgres psql -U leadforix -d leadforix
+
+# Run database migrations from host
+uv run alembic upgrade head
+```
+
+**Access URLs & Ports**:
+- Gateway (Traefik): `http://localhost` (port 80)
+- Auth Swagger Docs: `http://localhost/api/auth/docs`
+- Traefik Dashboard: `http://localhost:8080`
+- Postgres (Host mapped): `localhost:5433` (User: `leadforix`, DB: `leadforix`)
+- Redis: `localhost:6379` · Qdrant: `http://localhost:6333`
 
 > All services and infrastructure run containerized on the internal `leadforix-network` bridge network. Traefik serves as the single external gateway and routes to services via internal Docker DNS. Mounted volumes allow local hot reloading during development.
 

@@ -78,3 +78,61 @@ class DuplicateEntityError(LeadforixError):
             status_code=409,
             details={"entity_name": entity_name, "field": field, "value": str(value)},
         )
+
+
+
+class AuthenticationError(LeadforixError):
+    """
+    Raised when authentication credentials or tokens are invalid, missing, or expired.
+    HTTP Status: 401 Unauthorized.
+    """
+
+    def __init__(
+        self,
+        message: str = "Authentication failed",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            code="AUTHENTICATION_ERROR",
+            status_code=401,
+            details=details,
+        )
+
+
+class AuthorizationError(LeadforixError):
+    """
+    Raised when an authenticated user lacks the required RBAC role or permission.
+    HTTP Status: 403 Forbidden.
+    """
+
+    def __init__(
+        self,
+        message: str = "Permission denied",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            code="AUTHORIZATION_ERROR",
+            status_code=403,
+            details=details,
+        )
+
+
+class ConflictError(LeadforixError):
+    """
+    Raised on resource state conflicts (e.g., attempting to register an existing email).
+    HTTP Status: 409 Conflict.
+    """
+
+    def __init__(
+        self,
+        message: str = "Resource conflict occurred",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            code="CONFLICT",
+            status_code=409,
+            details=details,
+        )
