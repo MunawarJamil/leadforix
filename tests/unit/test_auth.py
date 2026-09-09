@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
@@ -19,6 +19,7 @@ client = TestClient(app)
 # ==============================================================================
 # 1. Cryptographic & Security Primitives Tests
 # ==============================================================================
+
 
 def test_password_hasher_one_way_and_verification():
     """
@@ -81,12 +82,13 @@ def test_token_service_refresh_token_generation():
     assert len(raw_token) > 40
     assert len(token_hash) == 64  # SHA-256 hex length
     assert service.hash_token(raw_token) == token_hash
-    assert expires_at > datetime.now(timezone.utc)
+    assert expires_at > datetime.now(UTC)
 
 
 # ==============================================================================
 # 2. API Flow Tests (FastAPI Dependency Injection Overrides)
 # ==============================================================================
+
 
 @pytest.fixture
 def mock_auth_service():
@@ -110,8 +112,8 @@ def test_api_register_success(mock_auth_service):
         hashed_password="bcrypt-hashed-string",
         role=UserRole.SALES_USER,
         is_active=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     mock_auth_service.register_user.return_value = fake_user
 
@@ -161,8 +163,8 @@ def test_api_login_success(mock_auth_service):
         hashed_password="hash",
         role=UserRole.SALES_USER,
         is_active=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     mock_auth_service.authenticate_user.return_value = (fake_tokens, fake_user)
 
@@ -181,7 +183,9 @@ def test_api_login_invalid_credentials(mock_auth_service):
     """
     Test POST /login returns 401 Unauthorized on wrong password.
     """
-    mock_auth_service.authenticate_user.side_effect = AuthenticationError("Invalid email or password")
+    mock_auth_service.authenticate_user.side_effect = AuthenticationError(
+        "Invalid email or password"
+    )
 
     response = client.post(
         "/login",
@@ -207,8 +211,8 @@ def test_api_refresh_success(mock_auth_service):
         hashed_password="hash",
         role=UserRole.SALES_USER,
         is_active=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     mock_auth_service.refresh_session.return_value = (rotated_tokens, fake_user)
 
@@ -239,8 +243,8 @@ def test_api_protected_me_endpoint(mock_auth_service):
         hashed_password="hash",
         role=UserRole.OWNER,
         is_active=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     mock_auth_service.get_user_by_id.return_value = fake_user
 

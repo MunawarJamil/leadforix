@@ -80,7 +80,6 @@ class DuplicateEntityError(LeadforixError):
         )
 
 
-
 class AuthenticationError(LeadforixError):
     """
     Raised when authentication credentials or tokens are invalid, missing, or expired.

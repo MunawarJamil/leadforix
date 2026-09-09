@@ -7,7 +7,7 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Ticket**: Day 04 — Auth Service: Authentication
+- **Current Ticket**: Day 05 — Auth Service: Authorization & Security Hardening
 - **Status**: Completed
 
 ---
@@ -38,7 +38,7 @@ Any AI model or developer starting a new chat session should read this file firs
   - Shared database config with automatic dialect normalization (`postgresql+asyncpg://`) and connection pool tuning (`shared/config/database.py`).
   - Declarative Base with `AsyncAttrs`, `UUIDPrimaryKeyMixin`, and `TimestampMixin` (`shared/database/base.py`).
   - Async engine, session factory, transaction context manager, and ping utility (`shared/database/session.py`).
-  - Async migrations foundation with Alembic (`alembic.ini`, `infrastructure/database/alembic/`).
+  - Async migrations foundation with Alembic (`alembic.ini`, `infrastructure/database/migrations/`).
   - Common domain/DB exception hierarchy and standard FastAPI JSON error handlers (`shared/exceptions/`).
   - Structured JSON logging foundation emitting to stdout (`shared/logging/logger.py`).
   - Live PostgreSQL connectivity check and structured logging wired into `auth_service` (`apps/services/auth_service/app/main.py`).
@@ -52,7 +52,16 @@ Any AI model or developer starting a new chat session should read this file firs
   - API Layer: Request/Response DTO schemas, `POST /register`, `POST /login`, `POST /refresh`, `POST /logout`, protected `GET /me`.
   - Security Dependencies: `get_current_user` JWT bearer guard and higher-order `require_roles` RBAC policy dependency.
   - Shared domain exceptions added: `AuthenticationError` (401), `AuthorizationError` (403), `ConflictError` (409).
-  - 28/28 unit tests passing across all suites (`tests/unit/test_auth.py`, `test_database.py`, `test_exceptions.py`, `test_health.py`).
+- [x] **Day 05 Auth Service — Authorization & Security Hardening**:
+  - **Shared Security Module (`shared/security/`)**: Reusable by all downstream microservices (`workspace_service`, `lead_service`, etc.) to statelessly authenticate requests without DB access. Includes `UserPrincipal`, `SecuritySettings`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, and `require_workspace`.
+  - **Downstream Token Claims**: Access tokens enriched with `sub`, `email`, `role`, `workspace_id`, `type="access"`, `iss="leadforix-auth"`, `aud="leadforix-api"`.
+  - **Input Sanitization & Password Complexity**: Pydantic validators enforcing whitespace trimming, lowercase emails, and password entropy (min 8 chars, uppercase, lowercase, digit, special character).
+  - **RFC 6819 Token Family Reuse Detection**: Re-submitting a revoked refresh token automatically triggers breach invalidation, terminating all active sessions for that user across all devices.
+  - **Account Lifecycle States (`UserStatus`)**: Explicit `ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION` statuses blocking suspended or unverified accounts during login and token refresh.
+  - **Password Reset Foundation**: `PasswordResetToken` entity and model storing 64-char CSPRNG SHA-256 digests with 15-minute expiration; `POST /password-reset/request` (anti-enumeration) and `POST /password-reset/confirm` (session termination on password change).
+  - **Alembic Migration 002**: `002_add_user_status_and_password_reset.py` adding `status` to `users` and creating `password_reset_tokens` table.
+  - **Documentation**: Comprehensive `docs/architecture/service-authentication.md` guide for downstream microservices.
+  - **Unit Test Suite**: 38/38 unit tests passing across all suites (`test_security_hardening.py`, `test_auth.py`, `test_database.py`, `test_exceptions.py`, `test_health.py`).
 
 ---
 
@@ -65,26 +74,30 @@ Any AI model or developer starting a new chat session should read this file firs
 5. **Standardized Errors (Rule 17)**: DB connection failures return `503 DATABASE_CONNECTION_ERROR`; auth failures return `401 AUTHENTICATION_ERROR`; conflicts return `409 CONFLICT` without leaking internal traces.
 6. **Structured Logging**: Services emit JSON logs to `sys.stdout` for container observability.
 7. **Token Rotation & Defense in Depth**: Refresh tokens are stored strictly as SHA-256 digests in the DB; refreshing immediately invalidates the old token and issues a new pair.
-8. **Host Database Port (5433)**: Docker Postgres is mapped to host port `5433:5432` to avoid collision with any local native PostgreSQL installations (such as Postgres 18 on Windows).
-9. **Docker Compose Profiles & Selective Running**: Services inherit `profiles: ["full"]`. Core infra (`postgres`, `redis`, `traefik`) runs by default; individual services can be started on-demand (`docker compose up -d traefik <service>`), or everything with `--profile full`.
+8. **Token Reuse Breach Invalidation (RFC 6819)**: Re-presenting a revoked refresh token triggers immediate session invalidation for all active tokens belonging to that user.
+9. **Stateless Inter-Service Authentication**: Downstream services verify JWTs statelessly via `shared.security` without querying `auth_service` database or making network roundtrips.
+10. **Host Database Port (5433)**: Docker Postgres is mapped to host port `5433:5432` to avoid collision with any local native PostgreSQL installations.
+11. **Docker Compose Profiles & Selective Running**: Services inherit `profiles: ["full"]`. Core infra (`postgres`, `redis`, `traefik`) runs by default; individual services can be started on-demand (`docker compose up -d traefik <service>`), or everything with `--profile full`.
 
 ---
 
-## 4. Current Status — Day 04 Done
+## 4. Current Status — Day 05 Done
 
-**Day 04 Acceptance Criteria Achieved:**
-- Passwords are never stored in plaintext (salted bcrypt one-way hashing).
-- Access tokens authenticate protected endpoints (`/me` with Bearer token).
-- Refresh tokens issue new access tokens with single-use token rotation.
-- Invalid/expired tokens are rejected cleanly with 401.
-- Logout invalidates the refresh-token flow in the database.
-- Unit test suite covers cryptographic primitives, domain models, and API endpoints (28/28 passing).
+**Day 05 Acceptance Criteria Achieved:**
+- Downstream microservices can statelessly determine caller identity (`UserPrincipal.id`, `email`).
+- Downstream microservices can check user roles via `require_roles("OWNER", "ADMIN")`.
+- Downstream microservices can determine and enforce workspace context via `require_workspace` (claim or `X-Workspace-ID` header).
+- Cryptographic validity, expiration, issuer, and audience are verified statelessly.
+- Replay attacks using revoked refresh tokens are neutralized by automatic session invalidation.
+- Suspended accounts cannot log in or refresh tokens.
+- Password reset foundation is operational with anti-enumeration protection.
+- Unit test suite expanded from 28 to 38 tests (100% passing).
 
 ---
 
-## 5. Immediate Next Steps (Day 05 Preview)
+## 5. Immediate Next Steps (Day 06 Preview)
 
-Ready for **DAY-05** requirements.
+Ready for **DAY-06** ticket: `workspace_service` implementation and multi-tenancy foundation.
 
 ---
 

@@ -189,12 +189,12 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Day 04 Complete
+## 24. Current Status — Day 05 Complete
 
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
-**Done**: Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations, unified exceptions & structured logging, complete authentication service (`auth_service`) with salted bcrypt password hashing, JWT access token & opaque refresh token pair, single-use token rotation, token revocation/logout, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), protected endpoint dependencies (`get_current_user`, `require_roles`), and full unit test coverage (28 passed).
+**Done**: Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations (revisions 001 & 002), unified exceptions & structured logging, complete authentication service (`auth_service`) with salted bcrypt password hashing, JWT access token & opaque refresh token pair, single-use token rotation, token revocation/logout, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), account statuses (`ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION`), password reset foundation (request/confirm endpoints, SHA-256 hashed tokens, session revocation), RFC 6819 token reuse detection and breach invalidation, shared stateless security dependencies (`shared.security`: `UserPrincipal`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, `require_workspace`), architectural docs (`docs/architecture/service-authentication.md`), and full unit test coverage (38/38 passed).
 
-**Next**: Day 05 ticket.
+**Next**: Day 06 ticket.
 
 

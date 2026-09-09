@@ -22,7 +22,6 @@ def get_auth_service(session: AsyncSession = Depends(get_db_session)) -> AuthSer
     return AuthService(session)
 
 
-
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
     auth_service: AuthService = Depends(get_auth_service),
