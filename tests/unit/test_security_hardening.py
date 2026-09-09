@@ -279,7 +279,7 @@ async def test_suspended_user_login_blocked():
     )
 
     service._repo.get_user_by_email = AsyncMock(return_value=suspended_user)
-    service._hasher.verify_password = lambda p, h: True
+    service._hasher.verify_password = AsyncMock(return_value=True)
 
     with pytest.raises(AuthenticationError, match="suspended"):
         await service.authenticate_user("suspended@leadforix.com", "any_password")

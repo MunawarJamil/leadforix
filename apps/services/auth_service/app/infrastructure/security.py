@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
@@ -20,18 +21,28 @@ class PasswordHasher:
     - Single Responsibility Principle (SRP): Dedicated exclusively to credential hashing.
     - Adaptive Salting: Uses bcrypt with per-password random salts to defeat rainbow tables.
     - Timing Attack Resistance: Uses bcrypt's constant-time comparison to prevent timing side-channel attacks.
+    - Non-Blocking Concurrency: Executes CPU-intensive hashing within asyncio.to_thread to prevent
+      freezing Python's async event loop under concurrent load.
     """
 
     @staticmethod
-    def hash_password(password: str) -> str:
-        """Generates a secure salted bcrypt hash for a plaintext password."""
+    async def hash_password(password: str) -> str:
+        """Generates a secure salted bcrypt hash for a plaintext password offloaded to a thread pool."""
+        return await asyncio.to_thread(PasswordHasher._hash_sync, password)
+
+    @staticmethod
+    def _hash_sync(password: str) -> str:
         salt = bcrypt.gensalt()
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
         return hashed.decode("utf-8")
 
     @staticmethod
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Verifies a plaintext password against a stored bcrypt hash in constant time."""
+    async def verify_password(plain_password: str, hashed_password: str) -> bool:
+        """Verifies plaintext password against a stored bcrypt hash in worker thread pool."""
+        return await asyncio.to_thread(PasswordHasher._verify_sync, plain_password, hashed_password)
+
+    @staticmethod
+    def _verify_sync(plain_password: str, hashed_password: str) -> bool:
         try:
             return bcrypt.checkpw(
                 plain_password.encode("utf-8"),

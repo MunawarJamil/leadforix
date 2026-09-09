@@ -1,6 +1,7 @@
-from apps.services.auth_service.app.domain.roles import UserRole
 from dataclasses import dataclass
 from uuid import UUID
+
+from shared.security.roles import UserRole
 
 
 @dataclass(frozen=True)

@@ -6,6 +6,7 @@ import jwt
 from shared.exceptions import AuthenticationError
 from shared.security.config import SecuritySettings, get_security_settings
 from shared.security.principal import UserPrincipal
+from shared.security.roles import UserRole
 
 
 class StatelessTokenValidator:
@@ -59,9 +60,13 @@ class StatelessTokenValidator:
         if not email:
             raise AuthenticationError("Token missing 'email' claim")
 
-        role = payload.get("role")
-        if not role:
+        role_raw = payload.get("role")
+        if not role_raw:
             raise AuthenticationError("Token missing 'role' claim")
+        try:
+            role = UserRole(role_raw)
+        except ValueError as e:
+            raise AuthenticationError(f"Token contains invalid 'role' claim: {role_raw}") from e
 
         raw_workspace = payload.get("workspace_id")
         workspace_id: UUID | None = None

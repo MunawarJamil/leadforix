@@ -4,6 +4,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from apps.services.auth_service.app.api.routes import router as auth_router
@@ -41,16 +42,28 @@ app = FastAPI(
     root_path=root_path,
 )
 
+# CORS Middleware configuration for frontend SPA integration
+cors_origins_raw = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,http://localhost:5173,http://localhost:80,http://127.0.0.1:3000,http://127.0.0.1:5173",
+)
+cors_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Register common error handlers for uniform API error responses
 register_exception_handlers(app)
 
 # Mount routes:
 # 1. Root-level for Traefik API Gateway (since Traefik strips the '/api/auth' prefix)
-# 2. Under '/auth' for direct standalone calls (e.g. POST http://localhost:8002/auth/login)
+# 2. Direct standalone calls
 app.include_router(auth_router)
-
-# For now keep it commented
-# app.include_router(auth_router, prefix="/auth")
 
 
 @app.get("/")
@@ -62,11 +75,37 @@ async def root():
     return {"message": "Welcome to the leadforix auth service"}
 
 
-@app.get("/health")
+@app.get("/health/live", summary="Process Liveness Probe")
+async def liveness_check():
+    """
+    Liveness probe verifying that the FastAPI worker process is responsive.
+    Does NOT probe backing stores (PostgreSQL/Redis) to prevent orchestrator
+    restart loops during transient network blips.
+    """
+    return {"status": "live", "service": SERVICE_NAME}
+
+
+@app.get("/health/ready", summary="Dependency Readiness Probe")
+async def readiness_check():
+    """
+    Readiness probe verifying that the microservice and its backing dependencies
+    (PostgreSQL) are operational and ready to accept ingress traffic.
+    """
+    db_healthy = await ping_database()
+    response_payload = {
+        "service": SERVICE_NAME,
+        "version": "1.0.0",
+        "status": "ready" if db_healthy else "degraded",
+        "database": "connected" if db_healthy else "disconnected",
+    }
+    status_code = status.HTTP_200_OK if db_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+    return JSONResponse(status_code=status_code, content=response_payload)
+
+
+@app.get("/health", summary="Consolidated Health Probe (Backward Compatible)")
 async def health_check():
     """
-    Comprehensive health probe endpoint.
-    Verifies service status and live PostgreSQL connectivity, returning 503 if degraded.
+    Legacy / consolidated health endpoint maintaining backward compatibility with status="ok".
     """
     db_healthy = await ping_database()
     response_payload = {
