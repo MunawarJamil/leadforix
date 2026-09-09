@@ -39,7 +39,7 @@ select = [
     "B",   # flake8-bugbear
     "UP",  # pyupgrade
 ]
-ignore = []
+ignore = ["B008", "E501", "UP042"]
 
 [tool.ruff.format]
 quote-style = "double"

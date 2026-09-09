@@ -1,6 +1,6 @@
 import hashlib
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -61,18 +61,24 @@ class TokenService:
         user_id: UUID,
         email: str,
         role: UserRole,
+        workspace_id: UUID | None = None,
     ) -> str:
         """
         Factory Method: Assembles and signs a short-lived RFC 7519 JSON Web Token.
+        Includes Subject (user_id), email, RBAC role, optional active workspace context,
+        issuer, and audience claims for downstream microservice authorization.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expire = now + timedelta(minutes=self._settings.access_token_expire_minutes)
 
         payload: dict[str, Any] = {
             "sub": str(user_id),
             "email": email,
             "role": role.value,
+            "workspace_id": str(workspace_id) if workspace_id else None,
             "type": "access",
+            "iss": self._settings.issuer,
+            "aud": self._settings.audience,
             "iat": int(now.timestamp()),
             "exp": int(expire.timestamp()),
         }
@@ -86,6 +92,7 @@ class TokenService:
     def decode_access_token(self, token: str) -> dict[str, Any]:
         """
         Decodes and cryptographically validates a JWT access token.
+        Verifies HMAC signature, expiration, expected audience, and issuer.
         Raises AuthenticationError on expired signatures, invalid algorithms, or malformed tokens.
         """
         try:
@@ -93,6 +100,8 @@ class TokenService:
                 token,
                 self._settings.secret_key,
                 algorithms=[self._settings.algorithm],
+                audience=self._settings.audience,
+                issuer=self._settings.issuer,
             )
             if payload.get("type") != "access":
                 raise AuthenticationError("Invalid token type")
@@ -112,9 +121,7 @@ class TokenService:
         """
         raw_token = secrets.token_urlsafe(64)
         token_hash = self.hash_token(raw_token)
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            days=self._settings.refresh_token_expire_days
-        )
+        expires_at = datetime.now(UTC) + timedelta(days=self._settings.refresh_token_expire_days)
         return raw_token, token_hash, expires_at
 
     @staticmethod

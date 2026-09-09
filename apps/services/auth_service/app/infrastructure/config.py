@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -29,12 +30,22 @@ class AuthSettings(BaseSettings):
         alias="JWT_ALGORITHM",
         description="Signature algorithm for JWT tokens",
     )
+    issuer: str = Field(
+        default="leadforix-auth",
+        alias="JWT_ISSUER",
+        description="Expected JWT token issuer",
+    )
+    audience: str = Field(
+        default="leadforix-api",
+        alias="JWT_AUDIENCE",
+        description="Expected JWT token audience",
+    )
     access_token_expire_minutes: int = Field(
         default=15,
         alias="ACCESS_TOKEN_EXPIRE_MINUTES",
         description="Lifetime of short-lived access tokens in minutes",
     )
-    refresh_token_expire_days: int = Field( 
+    refresh_token_expire_days: int = Field(
         default=7,
         alias="REFRESH_TOKEN_EXPIRE_DAYS",
         description="Lifetime of long-lived refresh tokens in days",

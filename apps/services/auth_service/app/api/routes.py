@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, status
 from apps.services.auth_service.app.api.dependencies import get_auth_service, get_current_user
 from apps.services.auth_service.app.api.schemas import (
     MessageResponse,
+    PasswordResetConfirmRequest,
+    PasswordResetRequest,
     TokenRefreshRequest,
     TokenResponse,
     UserLoginRequest,
@@ -104,3 +106,47 @@ async def get_me(
 ) -> UserResponse:
     """Protected endpoint returning identity & role of authenticated caller."""
     return UserResponse.model_validate(current_user)
+
+
+@router.post(
+    "/password-reset/request",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Request a password reset link/token",
+)
+async def request_password_reset(
+    payload: PasswordResetRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> MessageResponse:
+    """
+    Anti-Enumeration Endpoint:
+    Always returns 200 OK regardless of whether the email exists in the database,
+    preventing account enumeration reconnaissance attacks.
+    """
+    await auth_service.request_password_reset(payload.email)
+    return MessageResponse(
+        message="If an account exists with this email, password reset instructions have been sent."
+    )
+
+
+@router.post(
+    "/password-reset/confirm",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Confirm password reset with valid token",
+)
+async def confirm_password_reset(
+    payload: PasswordResetConfirmRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> MessageResponse:
+    """
+    Validates reset token, applies new password, invalidates the token,
+    and terminates all existing active sessions.
+    """
+    await auth_service.confirm_password_reset(
+        raw_token=payload.token,
+        new_password=payload.new_password,
+    )
+    return MessageResponse(
+        message="Password successfully reset. Please log in with your new credentials."
+    )
