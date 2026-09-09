@@ -1,4 +1,3 @@
-from apps.services.auth_service.app.domain.roles import UserRole
 from uuid import UUID
 
 from fastapi import Depends, Header
@@ -6,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from shared.exceptions import AuthenticationError, AuthorizationError
 from shared.security.principal import UserPrincipal
+from shared.security.roles import UserRole
 from shared.security.validator import StatelessTokenValidator
 
 # Reusable HTTP Bearer scheme (auto_error=False allows centralized custom 401 exceptions)

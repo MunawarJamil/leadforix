@@ -14,6 +14,7 @@ from apps.services.auth_service.app.domain.roles import UserRole, UserStatus
 from apps.services.auth_service.app.infrastructure.config import get_auth_settings
 from apps.services.auth_service.app.infrastructure.repository import AuthRepository
 from apps.services.auth_service.app.infrastructure.security import PasswordHasher, TokenService
+from shared.database.session import transaction
 from shared.exceptions import AuthenticationError, ConflictError
 
 
@@ -38,6 +39,7 @@ class AuthService:
     """
 
     def __init__(self, session: AsyncSession) -> None:
+        self._session = session
         self._repo = AuthRepository(session)
         self._hasher = PasswordHasher()
         self._token_service = TokenService()
@@ -59,10 +61,11 @@ class AuthService:
             raise ConflictError(f"User with email '{normalized_email}' already exists")
 
         now = datetime.now(UTC)
+        hashed_password = await self._hasher.hash_password(password)
         user = User(
             id=uuid.uuid4(),
             email=normalized_email,
-            hashed_password=self._hasher.hash_password(password),
+            hashed_password=hashed_password,
             role=role,
             is_active=True,
             created_at=now,
@@ -79,7 +82,7 @@ class AuthService:
         Authenticates credentials and issues a fresh token pair.
         """
         user = await self._repo.get_user_by_email(email)
-        if not user or not self._hasher.verify_password(password, user.hashed_password):
+        if not user or not await self._hasher.verify_password(password, user.hashed_password):
             raise AuthenticationError("Invalid email or password")
 
         if user.status == UserStatus.SUSPENDED:
@@ -193,15 +196,17 @@ class AuthService:
         if not user or not user.is_active or user.status == UserStatus.SUSPENDED:
             raise AuthenticationError("Associated user account is no longer active")
 
-        # 1. Update password
-        new_hashed = self._hasher.hash_password(new_password)
-        await self._repo.update_user_password(user.id, new_hashed)
+        # Atomic Multi-Step Update (ACID Transaction)
+        async with transaction(self._session):
+            # 1. Update password
+            new_hashed = await self._hasher.hash_password(new_password)
+            await self._repo.update_user_password(user.id, new_hashed)
 
-        # 2. Invalidate reset token (Single-Use)
-        await self._repo.mark_password_reset_token_used(token_hash)
+            # 2. Invalidate reset token (Single-Use)
+            await self._repo.mark_password_reset_token_used(token_hash)
 
-        # 3. Revoke all active sessions (Defense-in-depth)
-        await self._repo.revoke_all_user_tokens(user.id)
+            # 3. Revoke all active sessions (Defense-in-depth)
+            await self._repo.revoke_all_user_tokens(user.id)
 
     async def _issue_token_pair(self, user: User) -> TokenPair:
         """Internal helper to mint access and refresh tokens and persist token hash."""

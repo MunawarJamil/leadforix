@@ -37,3 +37,41 @@ def test_service_health(service_name: str, app):
         data = response.json()
         assert data["status"] == "ok"
         assert data["service"] == service_name
+
+
+def test_auth_service_liveness_probe():
+    """
+    Verify /health/live returns 200 without querying database.
+    """
+    client = TestClient(auth_app)
+    response = client.get("/health/live")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "live"
+    assert data["service"] == "auth_service"
+
+
+def test_auth_service_readiness_probe_healthy():
+    """
+    Verify /health/ready returns 200 when database is reachable.
+    """
+    with patch("apps.services.auth_service.app.main.ping_database", return_value=True):
+        client = TestClient(auth_app)
+        response = client.get("/health/ready")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ready"
+        assert data["database"] == "connected"
+
+
+def test_auth_service_readiness_probe_degraded():
+    """
+    Verify /health/ready returns 503 when database is unreachable.
+    """
+    with patch("apps.services.auth_service.app.main.ping_database", return_value=False):
+        client = TestClient(auth_app)
+        response = client.get("/health/ready")
+        assert response.status_code == 503
+        data = response.json()
+        assert data["status"] == "degraded"
+        assert data["database"] == "disconnected"

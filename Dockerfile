@@ -11,14 +11,21 @@ ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 
+# Create unprivileged system user for container security hardening (CIS Docker Benchmark)
+RUN groupadd --system --gid 10001 appgroup && \
+    useradd --system --uid 10001 --gid appgroup --no-create-home appuser
+
 # Install dependencies first for Docker layer caching
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --frozen --no-dev
 
-# Copy application code
-COPY apps ./apps
-COPY shared ./shared
-COPY infrastructure ./infrastructure
+# Copy application code with unprivileged ownership
+COPY --chown=appuser:appgroup apps ./apps
+COPY --chown=appuser:appgroup shared ./shared
+COPY --chown=appuser:appgroup infrastructure ./infrastructure
+
+# Switch from root to unprivileged user
+USER appuser
 
 # Default command (overridden per service in docker-compose)
 CMD ["uvicorn", "apps.services.auth_service.app.main:app", "--host", "0.0.0.0", "--port", "8002"]

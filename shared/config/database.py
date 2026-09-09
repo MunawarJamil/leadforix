@@ -19,10 +19,17 @@ class DatabaseSettings(BaseSettings):
         description="Async PostgreSQL connection string",
     )
 
-    # Connection Pool Settings
-    pool_size: int = Field(default=10, alias="DB_POOL_SIZE", description="Base pool size")
+    # Connection Pool Settings: Sized conservatively for multi-microservice architecture
+    # (8 services * workers) to prevent exhausting PostgreSQL's max_connections limit.
+    pool_size: int = Field(
+        default=5,
+        alias="DB_POOL_SIZE",
+        description="Base connection pool size per service process",
+    )
     max_overflow: int = Field(
-        default=20, alias="DB_MAX_OVERFLOW", description="Max overflow connections"
+        default=5,
+        alias="DB_MAX_OVERFLOW",
+        description="Maximum transient overflow connections per process",
     )
     pool_timeout: float = Field(
         default=30.0,

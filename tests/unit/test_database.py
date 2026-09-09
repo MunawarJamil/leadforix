@@ -1,11 +1,12 @@
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from sqlalchemy import Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from shared.config.database import DatabaseSettings
 from shared.database.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-from shared.database.session import ping_database, transaction
+from shared.database.session import get_db_session, ping_database, transaction
 
 
 class DummyItem(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -75,3 +76,58 @@ async def test_ping_database_failure_handled_cleanly():
 
     result = await ping_database(mock_engine)
     assert result is False
+
+
+@pytest.mark.asyncio
+async def test_get_db_session_commits_on_success(monkeypatch):
+    """
+    Verify get_db_session commits transaction when generator completes cleanly.
+    Acceptance Criteria: Unit of work changes are persisted automatically on HTTP success.
+    """
+    mock_session = AsyncMock()
+    mock_factory = MagicMock()
+    mock_factory.return_value.__aenter__.return_value = mock_session
+    mock_factory.return_value.__aexit__.return_value = None
+
+    import shared.database.session as session_module
+
+    monkeypatch.setattr(session_module, "async_session_factory", mock_factory)
+
+    gen = get_db_session()
+    session = await anext(gen)
+    assert session is mock_session
+
+    # Complete the generator
+    with pytest.raises(StopAsyncIteration):
+        await anext(gen)
+
+    mock_session.commit.assert_awaited_once()
+    mock_session.rollback.assert_not_called()
+    mock_session.close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_get_db_session_rolls_back_on_error(monkeypatch):
+    """
+    Verify get_db_session rolls back transaction and re-raises when exception occurs.
+    """
+    mock_session = AsyncMock()
+    mock_factory = MagicMock()
+    mock_factory.return_value.__aenter__.return_value = mock_session
+    mock_factory.return_value.__aexit__.return_value = None
+
+    import shared.database.session as session_module
+
+    monkeypatch.setattr(session_module, "async_session_factory", mock_factory)
+
+    gen = get_db_session()
+    session = await anext(gen)
+    assert session is mock_session
+
+    # Inject exception into the generator
+    with pytest.raises(RuntimeError, match="Simulated route error"):
+        await gen.athrow(RuntimeError("Simulated route error"))
+
+    mock_session.rollback.assert_awaited_once()
+    mock_session.commit.assert_not_called()
+    mock_session.close.assert_awaited_once()

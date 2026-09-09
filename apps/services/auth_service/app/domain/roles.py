@@ -1,11 +1,6 @@
 from enum import Enum
 
-
-class UserRole(str, Enum):
-    OWNER = "OWNER"  # Full organizational & billing authority
-    ADMIN = "ADMIN"  # Administrative authority across workspace settings
-    SALES_USER = "SALES_USER"  # Standard SDR user conducting research and outreach
-    AGENT = "AGENT"  # AI Agent
+from shared.security.roles import UserRole
 
 
 class UserStatus(str, Enum):
@@ -21,3 +16,6 @@ class UserStatus(str, Enum):
     ACTIVE = "ACTIVE"
     SUSPENDED = "SUSPENDED"
     PENDING_VERIFICATION = "PENDING_VERIFICATION"
+
+
+__all__ = ["UserRole", "UserStatus"]

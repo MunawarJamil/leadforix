@@ -62,6 +62,20 @@ Any AI model or developer starting a new chat session should read this file firs
   - **Alembic Migration 002**: `002_add_user_status_and_password_reset.py` adding `status` to `users` and creating `password_reset_tokens` table.
   - **Documentation**: Comprehensive `docs/architecture/service-authentication.md` guide for downstream microservices.
   - **Unit Test Suite**: 38/38 unit tests passing across all suites (`test_security_hardening.py`, `test_auth.py`, `test_database.py`, `test_exceptions.py`, `test_health.py`).
+- [x] **Production Hardening & Architectural Refactoring**:
+  - **Transaction Persistence Lifecycle**: Added automatic `commit()` on HTTP success and `rollback()` on error in `get_db_session` ([session.py](file:///e:/PERSONAL-PROJECTS/leadforix/shared/database/session.py)).
+  - **Service Boundary Decoupling**: Extracted canonical `UserRole` into [shared/security/roles.py](file:///e:/PERSONAL-PROJECTS/leadforix/shared/security/roles.py), removing tight coupling from `auth_service`.
+  - **Strict Role Validation**: Enforced enum coercion and validation in `StatelessTokenValidator` ([validator.py](file:///e:/PERSONAL-PROJECTS/leadforix/shared/security/validator.py)).
+  - **Connection Pool Tuning**: Sized pool defaults to `pool_size=5, max_overflow=5` in [database.py](file:///e:/PERSONAL-PROJECTS/leadforix/shared/config/database.py) to prevent PostgreSQL starvation across microservices.
+  - **Eliminated ORM Query Amplification**: Replaced `lazy="selectin"` with `lazy="raise"` on `UserModel.refresh_tokens` and `reset_tokens` ([models.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/infrastructure/models.py)), removing 2 redundant SQL queries per user fetch.
+  - **Composite Index Optimization**: Added `(user_id, is_revoked)` composite index on `RefreshTokenModel` and created Alembic revision `003_add_composite_index_on_refresh_tokens.py`.
+  - **Non-Blocking Bcrypt Concurrency**: Offloaded CPU-bound `bcrypt.hashpw` and `bcrypt.checkpw` to worker thread pool via `asyncio.to_thread` in [security.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/infrastructure/security.py), preventing async event loop freezes.
+  - **Async Service Calls**: Updated `register_user`, `authenticate_user`, and `confirm_password_reset` to `await` password hashing operations in [service.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/application/service.py).
+  - **Atomic Multi-Step Transactions**: Wrapped `confirm_password_reset` in explicit `async with transaction(...)` context in [service.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/application/service.py).
+  - **Frontend CORS Integration**: Attached `CORSMiddleware` with configurable `CORS_ORIGINS` in [main.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/main.py).
+  - **Decoupled SRE Health Probes**: Added non-blocking `/health/live` liveness probe and dependency `/health/ready` readiness probe in [main.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/main.py).
+  - **Container Security Hardening**: Added unprivileged `appuser:appgroup` (UID/GID 10001) in [Dockerfile](file:///e:/PERSONAL-PROJECTS/leadforix/Dockerfile) per CIS Docker benchmarks.
+  - **Test Suite Expansion**: Added unit tests in `test_database.py` and `test_health.py`, expanding test coverage to **43/43 passing tests (100%)**.
 
 ---
 

@@ -21,23 +21,24 @@ client = TestClient(app)
 # ==============================================================================
 
 
-def test_password_hasher_one_way_and_verification():
+@pytest.mark.asyncio
+async def test_password_hasher_one_way_and_verification():
     """
     Verify bcrypt one-way hashing and verification.
     Acceptance Criteria: Passwords are never stored or recoverable in plaintext.
     """
     raw_password = "SuperSecretPassword123!"
-    hashed = PasswordHasher.hash_password(raw_password)
+    hashed = await PasswordHasher.hash_password(raw_password)
 
     # Hash must not be plaintext and must contain bcrypt signature
     assert hashed != raw_password
     assert hashed.startswith("$2b$")
 
     # Correct password verifies
-    assert PasswordHasher.verify_password(raw_password, hashed) is True
+    assert await PasswordHasher.verify_password(raw_password, hashed) is True
 
     # Incorrect password fails
-    assert PasswordHasher.verify_password("WrongPassword!", hashed) is False
+    assert await PasswordHasher.verify_password("WrongPassword!", hashed) is False
 
 
 def test_token_service_access_token_lifecycle():
