@@ -7,7 +7,7 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Ticket**: Day 03 — Database Foundation & Shared Backend Infrastructure
+- **Current Ticket**: Day 04 — Auth Service: Authentication
 - **Status**: Completed
 
 ---
@@ -42,7 +42,17 @@ Any AI model or developer starting a new chat session should read this file firs
   - Common domain/DB exception hierarchy and standard FastAPI JSON error handlers (`shared/exceptions/`).
   - Structured JSON logging foundation emitting to stdout (`shared/logging/logger.py`).
   - Live PostgreSQL connectivity check and structured logging wired into `auth_service` (`apps/services/auth_service/app/main.py`).
-  - Comprehensive unit test suite in `tests/unit/` (17/17 tests passing).
+- [x] **Day 04 Auth Service — Authentication**:
+  - Cryptographic dependencies installed: `pyjwt>=2.8.0`, `bcrypt>=4.0.0`.
+  - Security configuration with environment variables (`AuthSettings` in `apps/services/auth_service/app/infrastructure/config.py`).
+  - Domain models: `UserRole` (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`) and pure immutable entities `User`, `RefreshToken` (`apps/services/auth_service/app/domain/`).
+  - Persistence Layer: `UserModel` & `RefreshTokenModel` ORM mapping, indexed SHA-256 token hashes, and Alembic revision `001_create_auth_tables`.
+  - Security Layer: `PasswordHasher` with adaptive bcrypt salting & constant-time check; `TokenService` for signed JWT access tokens and opaque refresh tokens.
+  - Application Layer: `AuthRepository` and `AuthService` handling registration, authentication, single-use token rotation, and logout revocation.
+  - API Layer: Request/Response DTO schemas, `POST /register`, `POST /login`, `POST /refresh`, `POST /logout`, protected `GET /me`.
+  - Security Dependencies: `get_current_user` JWT bearer guard and higher-order `require_roles` RBAC policy dependency.
+  - Shared domain exceptions added: `AuthenticationError` (401), `AuthorizationError` (403), `ConflictError` (409).
+  - 28/28 unit tests passing across all suites (`tests/unit/test_auth.py`, `test_database.py`, `test_exceptions.py`, `test_health.py`).
 
 ---
 
@@ -52,26 +62,29 @@ Any AI model or developer starting a new chat session should read this file firs
 2. **AsyncIO Native**: All database interactions use SQLAlchemy 2.0 async engine and `asyncpg`. Standard `postgresql://` URLs in `.env` are automatically normalized.
 3. **Connection Pooling**: Pre-ping is enabled by default to drop dead sockets cleanly.
 4. **Service Isolation**: No cross-service database access. Models and services inherit from shared base abstractions without referencing another service's tables.
-5. **Standardized Errors (Rule 17)**: DB connection failures return `503 DATABASE_CONNECTION_ERROR` without leaking SQL syntax or connection strings to callers.
+5. **Standardized Errors (Rule 17)**: DB connection failures return `503 DATABASE_CONNECTION_ERROR`; auth failures return `401 AUTHENTICATION_ERROR`; conflicts return `409 CONFLICT` without leaking internal traces.
 6. **Structured Logging**: Services emit JSON logs to `sys.stdout` for container observability.
+7. **Token Rotation & Defense in Depth**: Refresh tokens are stored strictly as SHA-256 digests in the DB; refreshing immediately invalidates the old token and issues a new pair.
+8. **Host Database Port (5433)**: Docker Postgres is mapped to host port `5433:5432` to avoid collision with any local native PostgreSQL installations (such as Postgres 18 on Windows).
+9. **Docker Compose Profiles & Selective Running**: Services inherit `profiles: ["full"]`. Core infra (`postgres`, `redis`, `traefik`) runs by default; individual services can be started on-demand (`docker compose up -d traefik <service>`), or everything with `--profile full`.
 
 ---
 
-## 4. Current Status — Day 03 Done
+## 4. Current Status — Day 04 Done
 
-**Day 03 Acceptance Criteria Achieved:**
-- Services can connect to PostgreSQL using async engine & session factories.
-- Database migrations foundation established with async Alembic (`alembic heads` succeeds).
-- Transactions work correctly with auto-commit and rollback on error.
-- Database connection failures are handled cleanly (`ping_database` returns `False` safely; API returns 503 without leaking stack details).
-- No service directly depends on another service's internal database code.
-- 17 unit tests passing across services, database, and exception layers.
+**Day 04 Acceptance Criteria Achieved:**
+- Passwords are never stored in plaintext (salted bcrypt one-way hashing).
+- Access tokens authenticate protected endpoints (`/me` with Bearer token).
+- Refresh tokens issue new access tokens with single-use token rotation.
+- Invalid/expired tokens are rejected cleanly with 401.
+- Logout invalidates the refresh-token flow in the database.
+- Unit test suite covers cryptographic primitives, domain models, and API endpoints (28/28 passing).
 
 ---
 
-## 5. Immediate Next Steps (Day 04 Preview)
+## 5. Immediate Next Steps (Day 05 Preview)
 
-Ready for **DAY-04** requirements.
+Ready for **DAY-05** requirements.
 
 ---
 

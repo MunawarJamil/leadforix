@@ -1,3 +1,5 @@
+import os
+# other imports
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
@@ -6,6 +8,7 @@ from fastapi.responses import JSONResponse
 from shared.database import ping_database
 from shared.exceptions import register_exception_handlers
 from shared.logging import get_logger, setup_logging
+
 
 SERVICE_NAME = "auth_service"
 
@@ -29,10 +32,28 @@ async def lifespan(app: FastAPI):
 
 
 
-app = FastAPI(title="Leadforix Auth Service", lifespan=lifespan)
+# app = FastAPI(title="Leadforix Auth Service", lifespan=lifespan)
+
+root_path = os.getenv("ROOT_PATH", "/api/auth")
+app = FastAPI(
+    title="Leadforix Auth Service",
+    lifespan=lifespan,
+    root_path=root_path,
+)
 
 # Register common error handlers for uniform API error responses
 register_exception_handlers(app)
+
+
+from apps.services.auth_service.app.api.routes import router as auth_router
+
+# Mount routes:
+# 1. Root-level for Traefik API Gateway (since Traefik strips the '/api/auth' prefix)
+# 2. Under '/auth' for direct standalone calls (e.g. POST http://localhost:8002/auth/login)
+app.include_router(auth_router)
+
+# For now keep it commented
+# app.include_router(auth_router, prefix="/auth")
 
 
 @app.get("/")

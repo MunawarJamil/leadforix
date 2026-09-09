@@ -189,11 +189,12 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Day 03 Complete
+## 24. Current Status — Day 04 Complete
 
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
-**Done**: Monorepo structure & Clean Architecture for all 8 microservices, environment strategy, tooling (`uv`, `ruff`, `pytest`), full Docker Compose stack under `infrastructure/docker-compose.yml`, Celery worker foundation, async PostgreSQL engine & connection pooling (`asyncpg`, `SQLAlchemy 2.0`), Alembic async migration foundation, shared declarative base & mixins, transaction context managers, unified exception handling & API error conventions, structured JSON logging, and comprehensive unit tests (17 passed).
+**Done**: Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations, unified exceptions & structured logging, complete authentication service (`auth_service`) with salted bcrypt password hashing, JWT access token & opaque refresh token pair, single-use token rotation, token revocation/logout, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), protected endpoint dependencies (`get_current_user`, `require_roles`), and full unit test coverage (28 passed).
 
-**Next**: Day 04 ticket.
+**Next**: Day 05 ticket.
+
 

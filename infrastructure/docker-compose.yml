@@ -10,6 +10,8 @@ volumes:
   qdrant_data:
 
 x-service-base: &service-base
+  profiles:
+    - full
   build:
     context: ..
     dockerfile: Dockerfile
@@ -44,15 +46,6 @@ services:
       - ./api_gateway/traefik/dynamic:/etc/traefik/dynamic:ro
     networks:
       - leadforix-network
-    depends_on:
-      - auth_service
-      - workspace_service
-      - lead_service
-      - campaign_service
-      - agent_service
-      - research_service
-      - knowledge_service
-      - outreach_service
 
   # ---------------- Infrastructure ----------------
   postgres:
@@ -63,7 +56,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-leadforix}
       POSTGRES_DB: ${POSTGRES_DB:-leadforix}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

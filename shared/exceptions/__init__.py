@@ -1,4 +1,7 @@
 from shared.exceptions.base import (
+    AuthenticationError,
+    AuthorizationError,
+    ConflictError,
     DatabaseConnectionError,
     DatabaseError,
     DuplicateEntityError,
@@ -17,6 +20,9 @@ __all__ = [
     "DatabaseConnectionError",
     "EntityNotFoundError",
     "DuplicateEntityError",
+    "AuthenticationError",
+    "AuthorizationError",
+    "ConflictError",
     "ErrorDetail",
     "ErrorResponse",
     "register_exception_handlers",
