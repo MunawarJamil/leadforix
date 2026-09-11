@@ -1,5 +1,4 @@
 import uuid
-from datetime import UTC, datetime
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,12 +44,16 @@ class AuthRepository:
         user_model = result.scalar_one_or_none()
         return user_model.to_domain() if user_model else None
 
+
+
     async def create_user(self, user: User) -> User:
         """Persists a new user record in the database."""
         user_model = UserModel.from_domain(user)
         self._session.add(user_model)
         await self._session.flush()
         return user_model.to_domain()
+
+
 
     async def create_refresh_token(self, token: RefreshToken) -> RefreshToken:
         """Persists a new refresh token record."""
@@ -66,12 +69,16 @@ class AuthRepository:
         await self._session.flush()
         return token_model.to_domain()
 
+
+
     async def get_refresh_token_by_hash(self, token_hash: str) -> RefreshToken | None:
         """Looks up a refresh token by its SHA-256 digest."""
         stmt = select(RefreshTokenModel).where(RefreshTokenModel.token_hash == token_hash)
         result = await self._session.execute(stmt)
         token_model = result.scalar_one_or_none()
         return token_model.to_domain() if token_model else None
+
+
 
     async def revoke_refresh_token(self, token_hash: str) -> bool:
         """Marks a refresh token as revoked (used during token rotation and logout)."""
@@ -82,6 +89,9 @@ class AuthRepository:
         )
         result = await self._session.execute(stmt)
         return result.rowcount > 0
+
+
+
 
     async def revoke_all_user_tokens(self, user_id: uuid.UUID) -> int:
         """
@@ -137,7 +147,7 @@ class AuthRepository:
         stmt = (
             update(UserModel)
             .where(UserModel.id == user_id)
-            .values(hashed_password=new_hashed_password, updated_at=datetime.now(UTC))
+            .values(hashed_password=new_hashed_password)
         )
         result = await self._session.execute(stmt)
         return result.rowcount > 0
@@ -147,7 +157,7 @@ class AuthRepository:
         stmt = (
             update(UserModel)
             .where(UserModel.id == user_id)
-            .values(status=status.value, updated_at=datetime.now(UTC))
+            .values(status=status.value)
         )
         result = await self._session.execute(stmt)
         return result.rowcount > 0
