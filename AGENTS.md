@@ -4,9 +4,14 @@ Read this file fully before making any change. Multiple AI models work on this r
 
 ## 0. Project
 
-Leadforix is an AI-powered SDR platform (prospect research, lead scoring, personalized outreach, follow-up sequencing) built as a production-oriented Python microservices backend. Built incrementally via day-based tickets. Priority right now: correctness, architecture, and request/data flow — not new functionality beyond the current ticket.
+Leadforix is an AI-powered client acquisition and SDR platform designed for **freelancers, individual job seekers, and tech agencies** to identify high-intent opportunities and clients. Instead of generic cold mass-scraping of private personal PII (which carries severe GDPR/CAN-SPAM violations and platform risks), Leadforix operates on **intent-driven public signals** (companies actively hiring on Hacker News, Remotive, engineering pain points) to power targeted, value-first outreach using agentic AI.
 
-**Stack**: FastAPI, PostgreSQL, Qdrant, Redis, Celery, LangChain, LangGraph, RAG, Docker, Traefik.
+**Build Sequence**:
+1. **Phase 1 (Discovery & Lead Pipeline)**: Build a resilient, production-grade discovery ingestion pipeline (Algolia HN API + Remotive API), trigram fuzzy deduplication (`pg_trgm`), and keyword skill-matching in `lead_service`. This immediately serves individual client acquisition and dogfoods the platform on real live hiring data.
+2. **Phase 2 (Agentic AI & RAG Layer)**: Implement stateful multi-step agent workflows (LangGraph, LangChain, RAG, Qdrant, LangSmith) tested against real leads rather than synthetic mocks.
+3. **Phase 3 (Agency Expansion)**: Scale the platform to multi-tenant tech agencies with multi-seat workspaces, team collaboration, and client campaigns.
+
+**Stack**: FastAPI, PostgreSQL, Qdrant, Redis, Celery, LangChain, LangGraph, RAG, LangSmith, Docker, Traefik.
 
 ## 1. Golden Rule
 
@@ -189,12 +194,24 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Day 05 Complete
-
+## 24. Current Status — Discovery Phase (TICKET-01)
+ 
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
-**Done**: Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations (revisions 001 & 002), unified exceptions & structured logging, complete authentication service (`auth_service`) with salted bcrypt password hashing, JWT access token & opaque refresh token pair, single-use token rotation, token revocation/logout, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), account statuses (`ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION`), password reset foundation (request/confirm endpoints, SHA-256 hashed tokens, session revocation), RFC 6819 token reuse detection and breach invalidation, shared stateless security dependencies (`shared.security`: `UserPrincipal`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, `require_workspace`), architectural docs (`docs/architecture/service-authentication.md`), and full unit test coverage (38/38 passed).
+**Done**: 
+- Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations (revisions 001, 002, 003).
+- Unified exceptions, connection pool tuning, non-blocking async bcrypt, and structured logging.
+- Complete authentication service (`auth_service`): salted bcrypt, JWT access & opaque refresh tokens, single-use token rotation, RFC 6819 reuse detection, session revocation, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), account statuses (`ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION`), password reset foundation.
+- Shared stateless security module (`shared/security/`): `UserPrincipal`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, `require_workspace`.
+- Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (43/43 passed).
 
-**Next**: Day 06 ticket.
+**Active Roadmap — Discovery Phase (lead_service)**:
+- [ ] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
+- [ ] **TICKET-02**: Data normalization + dedup layer (`RawLead` schema, HN parser, Remotive mapper, PostgreSQL `pg_trgm` fuzzy deduplication)
+- [ ] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration, `LeadRepository`)
+- [ ] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
+- [ ] **TICKET-05**: Integration testing + polish (end-to-end verification with live APIs, rate-limit tests, structured logging review, documentation)
+
+**Next**: Start TICKET-01.
 
 

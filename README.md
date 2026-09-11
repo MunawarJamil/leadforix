@@ -1,11 +1,16 @@
 # Leadforix
 
-Leadforix is an AI-powered Sales Development Representative (SDR) platform that researches prospects, scores lead fit against a target profile, generates personalized outreach, and manages follow-up sequences using agentic AI. It's built as a production-oriented microservices backend, in the same problem space as tools like Clay, Instantly, and Apollo.
+Leadforix is an AI-powered client acquisition and SDR platform designed for **freelancers, individual job seekers, and tech agencies** to find high-intent clients and opportunities. Instead of scraping illegal personal PII for cold mass-emailing, Leadforix operates on **intent-driven public signals** (companies actively hiring on Hacker News, Remotive, engineering pain points) to power targeted, value-first outreach using agentic AI.
+
+It is built as a production-oriented microservices backend with a phased build sequence:
+1. **Phase 1 (Discovery & Lead Pipeline)**: Lean, production-grade discovery ingestion (Algolia HN API + Remotive API), trigram fuzzy deduplication, and skill-matching scoring.
+2. **Phase 2 (Agentic AI & RAG Layer)**: Stateful multi-step agent workflows (LangGraph, LangChain, RAG, Qdrant) tested against live, real-world leads rather than synthetic mocks.
+3. **Phase 3 (Agency Expansion)**: Multi-tenant workspace management, multi-client pipelines, team workflows, and full SDR follow-up sequencing.
 
 ## Stack
 
 - **API**: Python, FastAPI
-- **AI/Agents**: LangChain, LangGraph, RAG
+- **AI/Agents**: LangChain, LangGraph, RAG, LangSmith
 - **Data**: PostgreSQL, Qdrant (vectors), Redis
 - **Async**: Celery
 - **Infra**: Docker, Traefik (API gateway)
@@ -13,9 +18,9 @@ Leadforix is an AI-powered Sales Development Representative (SDR) platform that 
 ## Architecture
 
 ```
-Client → Traefik (Gateway) → [Auth | Workspace | Lead | Campaign | Outreach]
-                                        ↓
-Redis → Celery → AI Worker
+Client / Scheduler → Traefik (Gateway) → [Lead | Auth | Workspace | Campaign | Outreach]
+                                                ↓
+Redis → Celery Beat → Discovery Pipeline (HN / Remotive)
             ↓
 LangGraph → LangChain → LLM / Qdrant (RAG) → PostgreSQL
 ```

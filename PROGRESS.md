@@ -7,8 +7,9 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Ticket**: Day 05 — Auth Service: Authorization & Security Hardening
-- **Status**: Completed
+- **Current Phase**: Discovery Pipeline Phase (lead_service)
+- **Current Ticket**: TICKET-01 — Build resilient API clients for HN Algolia & Remotive
+- **Status**: In Progress
 
 ---
 
@@ -109,9 +110,30 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ---
 
-## 5. Immediate Next Steps (Day 06 Preview)
+## 5. Immediate Next Steps (Discovery Phase Roadmap)
 
-Ready for **DAY-06** ticket: `workspace_service` implementation and multi-tenancy foundation.
+### Discovery Pipeline (HN + Remotive) in `lead_service`
+
+Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Search API and Remotive API. Bypasses illegal private PII scraping in favor of live, high-intent public hiring signals.
+
+- [ ] **TICKET-01: Build resilient API clients for HN Algolia & Remotive** *(Active)*
+  - `httpx.AsyncClient`-based clients for Algolia HN Search API ("Who is hiring?") and Remotive API (software-dev jobs).
+  - Pydantic models for raw response validation.
+  - Resilience: `tenacity` exponential backoff, rate-limiting (429) backoff, explicit connection/read timeouts.
+  - Comprehensive unit test suite with mocked HTTP responses (success, timeout, 429, malformed JSON).
+- [ ] **TICKET-02: Data normalization + dedup layer**
+  - Common `RawLead` schema (`company_name`, `description`, `source`, `source_url`, `posted_at`, `discovered_at`).
+  - HN comment parser and Remotive mapper.
+  - PostgreSQL `pg_trgm` extension & GIN trigram index on `company_name` for fuzzy deduplication (>0.85 similarity).
+- [ ] **TICKET-03: Skill-matching scoring + persistence layer**
+  - Configurable skill-keyword matching (0–100 score) with qualification threshold.
+  - `Lead` SQLAlchemy model and Alembic migration (`status='new'`).
+  - Repository pattern (`LeadRepository`).
+- [ ] **TICKET-04: Celery orchestration**
+  - `discover_leads` Celery task with idempotency and partial-failure isolation.
+  - Celery Beat schedule and manual trigger endpoint (`POST /discovery/run`).
+- [ ] **TICKET-05: Integration testing + polish**
+  - End-to-end pipeline verification against live APIs, structured logging review, and documentation.
 
 ---
 
