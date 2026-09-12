@@ -46,14 +46,39 @@ def trigram_similarity(str1: str | None, str2: str | None) -> float:
 
     trigrams1 = generate_trigrams(norm1)
     trigrams2 = generate_trigrams(norm2)
+    return set_jaccard_similarity(trigrams1, trigrams2)
 
+
+def set_jaccard_similarity(trigrams1: set[str], trigrams2: set[str]) -> float:
+    """
+    Computes the Jaccard similarity directly between two pre-computed trigram sets.
+    Avoids re-allocating and re-tokenizing trigrams in high-throughput loops.
+    """
     if not trigrams1 or not trigrams2:
         return 0.0
 
-    intersection = trigrams1.intersection(trigrams2)
-    union = trigrams1.union(trigrams2)
+    # Fast path: identical set references or contents
+    if trigrams1 == trigrams2:
+        return 1.0
 
-    if not union:
+    intersection_len = len(trigrams1.intersection(trigrams2))
+    if intersection_len == 0:
         return 0.0
 
-    return len(intersection) / len(union)
+    union_len = len(trigrams1.union(trigrams2))
+    return intersection_len / union_len if union_len > 0 else 0.0
+
+
+def text_trigram_similarity(text1: str | None, text2: str | None) -> float:
+    """
+    Computes trigram similarity between arbitrary pre-normalized text strings (e.g. roles).
+    """
+    t1 = (text1 or "").strip()
+    t2 = (text2 or "").strip()
+    if not t1 or not t2:
+        return 0.0
+    if t1 == t2:
+        return 1.0
+
+    return set_jaccard_similarity(generate_trigrams(t1), generate_trigrams(t2))
+

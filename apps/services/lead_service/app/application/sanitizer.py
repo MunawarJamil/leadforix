@@ -73,3 +73,80 @@ def normalize_company_name(name: str | None) -> str:
     # Strip punctuation and collapse whitespace
     text = _PUNCTUATION_RE.sub(" ", text)
     return _MULTIPLE_SPACES_RE.sub(" ", text).strip()
+
+
+# URL query parameters that only serve tracking/analytics purposes
+_TRACKING_QUERY_PARAMS = frozenset({
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "ref",
+    "fbclid",
+    "gclid",
+    "msclkid",
+    "mc_cid",
+    "mc_eid",
+    "source",
+})
+
+_ROLE_NOISE_RE = re.compile(
+    r"\b(?:remote|onsite|hybrid|full[\s-]?time|part[\s-]?time|contract|urgent|immediate)\b",
+    re.IGNORECASE,
+)
+
+
+def normalize_url(raw_url: str | None) -> str:
+    """
+    Normalizes a URL by lowercasing scheme and host, stripping tracking query params
+    (e.g., UTM tags, ref, fbclid), and stripping trailing slashes and fragments.
+
+    Example:
+        "https://Company.com/jobs/123/?utm_source=hn&ref=feed#apply" -> "https://company.com/jobs/123"
+    """
+    if not raw_url:
+        return ""
+
+    from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+    try:
+        parts = urlsplit(raw_url.strip())
+        if not parts.netloc and not parts.path:
+            return ""
+
+        scheme = parts.scheme.lower()
+        netloc = parts.netloc.lower()
+
+        filtered_query: list[tuple[str, str]] = []
+        if parts.query:
+            for k, v in parse_qsl(parts.query, keep_blank_values=True):
+                if k.lower() not in _TRACKING_QUERY_PARAMS:
+                    filtered_query.append((k, v))
+
+        path = parts.path
+        if len(path) > 1 and path.endswith("/"):
+            path = path.rstrip("/")
+
+        new_query = urlencode(filtered_query)
+        # Drop fragment
+        return urlunsplit((scheme, netloc, path, new_query, ""))
+    except Exception:
+        return raw_url.strip().rstrip("/")
+
+
+def normalize_role_title(title: str | None) -> str:
+    """
+    Normalizes a job title for fuzzy role matching by lowercasing,
+    stripping punctuation, excess whitespace, and location/modality noise.
+
+    Example: "Senior Backend Engineer (Remote - Full Time)" -> "senior backend engineer"
+    """
+    if not title:
+        return ""
+
+    text = html.unescape(title).lower().strip()
+    text = _ROLE_NOISE_RE.sub("", text)
+    text = _PUNCTUATION_RE.sub(" ", text)
+    return _MULTIPLE_SPACES_RE.sub(" ", text).strip()
+

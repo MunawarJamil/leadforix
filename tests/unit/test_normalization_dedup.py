@@ -243,3 +243,120 @@ def test_dedup_service_filters_batch_with_fuzzy_match():
     assert len(filtered) == 2
     assert filtered[0].company_name == "PostHog"
     assert filtered[1].company_name == "GitHub"
+
+
+def test_dedup_retains_different_roles_at_same_company():
+    """Validates that distinct openings at the same company are NOT dropped."""
+    service = DeduplicationService(company_threshold=0.80, role_threshold=0.70)
+
+    lead_backend = RawLead(
+        company_name="Google",
+        title="Senior Backend Distributed Systems Engineer",
+        description="Backend opening",
+        source=LeadSource.HACKER_NEWS,
+        source_url="https://news.ycombinator.com/item?id=10",
+        source_id="10",
+    )
+    lead_designer = RawLead(
+        company_name="Google Inc.",
+        title="Principal Product & UI Designer",
+        description="Design opening",
+        source=LeadSource.REMOTIVE,
+        source_url="https://remotive.com/jobs/20",
+        source_id="20",
+    )
+
+    filtered = service.filter_batch([lead_backend, lead_designer])
+    assert len(filtered) == 2  # BOTH must be retained!
+
+
+def test_dedup_detects_fuzzy_cross_source_same_role():
+    """Validates that identical openings across different sources are merged."""
+    service = DeduplicationService(company_threshold=0.80, role_threshold=0.70)
+
+    lead_hn = RawLead(
+        company_name="Stripe",
+        title="Staff Infrastructure Engineer",
+        description="HN post",
+        source=LeadSource.HACKER_NEWS,
+        source_url="https://news.ycombinator.com/item?id=30",
+        source_id="30",
+    )
+    lead_remotive = RawLead(
+        company_name="Stripe, LLC",
+        title="Staff Infrastructure Engineer (Remote)",
+        description="Remotive listing",
+        source=LeadSource.REMOTIVE,
+        source_url="https://remotive.com/jobs/40",
+        source_id="40",
+    )
+
+    filtered = service.filter_batch([lead_hn, lead_remotive])
+    assert len(filtered) == 1
+    assert filtered[0].company_name == "Stripe"
+
+
+def test_dedup_url_normalization_strips_tracking_params():
+    """Validates that tracking parameters like UTM tags and ref do not bypass dedup."""
+    service = DeduplicationService()
+
+    lead_clean = RawLead(
+        company_name="Linear",
+        title="Product Engineer",
+        description="Clean link",
+        source=LeadSource.REMOTIVE,
+        source_url="https://linear.app/careers/product-eng",
+        source_id="50",
+    )
+    lead_tracked = RawLead(
+        company_name="Linear App",
+        title="Product Engineer",
+        description="Tracked link",
+        source=LeadSource.REMOTIVE,
+        source_url="https://Linear.app/careers/product-eng/?utm_source=hn&ref=feed#apply",
+        source_id="51",
+    )
+
+    is_dup, match = service.is_duplicate(lead_tracked, [lead_clean])
+    assert is_dup is True
+    assert match == lead_clean
+
+
+def test_dedup_respects_time_window():
+    """Validates that a new hiring cycle after the time window is NOT dropped."""
+    service = DeduplicationService(time_window_days=60)
+
+    old_lead = RawLead(
+        company_name="Vercel",
+        title="Frontend Architect",
+        description="Old listing from last year",
+        source=LeadSource.REMOTIVE,
+        source_url="https://remotive.com/jobs/old",
+        source_id="old",
+        posted_at=datetime(2025, 1, 1, 10, 0, tzinfo=timezone.utc),
+    )
+    new_lead = RawLead(
+        company_name="Vercel",
+        title="Frontend Architect",
+        description="New listing from today",
+        source=LeadSource.REMOTIVE,
+        source_url="https://remotive.com/jobs/new",
+        source_id="new",
+        posted_at=datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc),  # > 400 days later
+    )
+
+    is_dup, _ = service.is_duplicate(new_lead, [old_lead])
+    assert is_dup is False
+
+
+def test_dedup_threshold_validation():
+    """Ensures improper configuration immediately raises ValueError."""
+    with pytest.raises(ValueError, match="company_threshold"):
+        DeduplicationService(company_threshold=1.5)
+
+    with pytest.raises(ValueError, match="role_threshold"):
+        DeduplicationService(role_threshold=-0.1)
+
+    with pytest.raises(ValueError, match="time_window_days"):
+        DeduplicationService(time_window_days=-5)
+
