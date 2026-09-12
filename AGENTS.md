@@ -206,12 +206,12 @@ For infra changes: verify actual runtime behavior, not just config syntax.
 - Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (43/43 passed).
 
 **Active Roadmap — Discovery Phase (lead_service)**:
-- [ ] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
+- [x] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
 - [ ] **TICKET-02**: Data normalization + dedup layer (`RawLead` schema, HN parser, Remotive mapper, PostgreSQL `pg_trgm` fuzzy deduplication)
 - [ ] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration, `LeadRepository`)
 - [ ] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
 - [ ] **TICKET-05**: Integration testing + polish (end-to-end verification with live APIs, rate-limit tests, structured logging review, documentation)
 
-**Next**: Start TICKET-01.
+**Next**: Start TICKET-02.
 
 
