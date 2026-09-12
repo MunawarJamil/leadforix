@@ -3,6 +3,7 @@
 Leadforix is an AI-powered client acquisition and SDR platform designed for **freelancers, individual job seekers, and tech agencies** to find high-intent clients and opportunities. Instead of scraping illegal personal PII for cold mass-emailing, Leadforix operates on **intent-driven public signals** (companies actively hiring on Hacker News, Remotive, engineering pain points) to power targeted, value-first outreach using agentic AI.
 
 It is built as a production-oriented microservices backend with a phased build sequence:
+
 1. **Phase 1 (Discovery & Lead Pipeline)**: Lean, production-grade discovery ingestion (Algolia HN API + Remotive API), trigram fuzzy deduplication, and skill-matching scoring.
 2. **Phase 2 (Agentic AI & RAG Layer)**: Stateful multi-step agent workflows (LangGraph, LangChain, RAG, Qdrant) tested against live, real-world leads rather than synthetic mocks.
 3. **Phase 3 (Agency Expansion)**: Multi-tenant workspace management, multi-client pipelines, team workflows, and full SDR follow-up sequencing.
@@ -83,6 +84,7 @@ python main.py
 We use Docker Compose profiles so you don't have to run all 8 services simultaneously.
 
 **1. Run Only What You Need (Core Infra + Specific Service)**:
+
 ```bash
 # Start Traefik, Postgres, Redis + Auth Service only
 docker compose -f infrastructure/docker-compose.yml up -d traefik auth_service
@@ -92,11 +94,13 @@ docker compose -f infrastructure/docker-compose.yml up -d traefik lead_service
 ```
 
 **2. Start Full Stack (All 8 Services + Celery + Infra)**:
+
 ```bash
 docker compose -f infrastructure/docker-compose.yml --profile full up -d
 ```
 
 **3. Stop Services**:
+
 ```bash
 # Stop running services
 docker compose -f infrastructure/docker-compose.yml down
@@ -106,6 +110,7 @@ docker compose -f infrastructure/docker-compose.yml --profile full down
 ```
 
 **4. Useful Docker Commands**:
+
 ```bash
 # View live logs for a service
 docker logs -f leadforix-auth-service
@@ -118,6 +123,7 @@ uv run alembic upgrade head
 ```
 
 **Access URLs & Ports**:
+
 - Gateway (Traefik): `http://localhost` (port 80)
 - Auth Swagger Docs: `http://localhost/api/auth/docs`
 - Traefik Dashboard: `http://localhost:8080`

@@ -6,8 +6,11 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # Import all service models so Alembic registers them on Base.metadata
+from apps.services.auth_service.app.infrastructure.models import UserModel, RefreshTokenModel, PasswordResetTokenModel  # noqa: F401
+from apps.services.lead_service.app.infrastructure.models import LeadModel  # noqa: F401
 from shared.config.database import get_db_settings
 from shared.database.base import Base
+
 
 # Alembic Config object
 config = context.config

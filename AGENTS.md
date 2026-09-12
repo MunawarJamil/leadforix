@@ -29,9 +29,10 @@ If a request conflicts with an existing architectural decision, **state the conf
 ## 2. Working Style & Engineering Guidelines
 
 - **Step-by-step only**: Work incrementally, one step at a time. Never do everything at once or jump ahead to future tickets.
+- **Roadmap Preview Upfront**: Before beginning Step 1, clearly present the total step count and a concise high-level "what & why" summary for each step so the plan is understood before execution.
 - **No autonomous code modifications unless explicitly requested**: Do not write or edit codebase files directly unless the user explicitly requests you to do the implementation. First, understand the task carefully, explain the task and data flow concisely in chat with a short plan, and propose Step 1. Wait for the user's approval (`done`). Then tell the user what to do, where, and the short rationale why.
 - **Senior Architect Quality**: Code must be mature, highly scalable, and production-grade for multi-tenant high-throughput systems.
-- **Educational Annotations & Design Patterns**: When providing code snippets, add concise comments explaining what functions/classes do, explicitly identifying engineering principles and design patterns (e.g., Abstraction, Encapsulation, Dependency Injection, Repository, Factory, Singleton) to teach foundational software engineering.
+- **Concise Annotations & Design Patterns**: When providing code snippets, keep comments concise and focused—explicitly identifying engineering principles and design patterns (e.g., Abstraction, Encapsulation, Dependency Injection, Repository, Factory) without verbose explanations.
 - **Step 0 Branch Suggestion**: When starting any new task, Step 0 is always to suggest creating a new branch in chat (format: `feat/lf-XX-short-description`, e.g., `feat/lf-03-database-foundations`). Do not create it directly; suggest the exact git command for the user to run.
 - **Meaningful Commit Messages**: After completing the implementation and verification of a task, always provide a proper, meaningful conventional commit message summarizing the changes.
 - **Session Handover & Memory Updates**: When finishing a task or pausing for later, update `PROGRESS.md`, `AGENTS.md`, and the Mem0 MCP memory.
@@ -194,24 +195,24 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Discovery Phase (TICKET-01)
+## 24. Current Status — Discovery Phase (TICKET-04)
  
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
 **Done**: 
-- Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations (revisions 001, 002, 003).
+- Monorepo structure & Clean Architecture for all 8 microservices, Docker Compose stack, async PostgreSQL & Alembic migrations (revisions 001, 002, 003, 004).
 - Unified exceptions, connection pool tuning, non-blocking async bcrypt, and structured logging.
 - Complete authentication service (`auth_service`): salted bcrypt, JWT access & opaque refresh tokens, single-use token rotation, RFC 6819 reuse detection, session revocation, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), account statuses (`ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION`), password reset foundation.
 - Shared stateless security module (`shared/security/`): `UserPrincipal`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, `require_workspace`.
-- Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (43/43 passed).
+- Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (80/80 passed).
 
 **Active Roadmap — Discovery Phase (lead_service)**:
 - [x] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
 - [x] **TICKET-02**: Data normalization + dedup layer (`RawLead` schema, HN parser, Remotive mapper, PostgreSQL `pg_trgm` fuzzy deduplication)
-- [ ] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration, `LeadRepository`)
+- [x] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration 004, `LeadRepository`)
 - [ ] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
 - [ ] **TICKET-05**: Integration testing + polish (end-to-end verification with live APIs, rate-limit tests, structured logging review, documentation)
 
-**Next**: Start TICKET-03.
+**Next**: Start TICKET-04.
 
 
