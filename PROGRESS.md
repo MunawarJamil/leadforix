@@ -8,8 +8,8 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: Discovery Pipeline Phase (lead_service)
-- **Current Ticket**: TICKET-02 — Data normalization + dedup layer
-- **Status**: Ready to start (TICKET-01 Completed)
+- **Current Ticket**: TICKET-03 — Skill-matching scoring + persistence layer
+- **Status**: Ready to start (TICKET-02 Completed)
 
 ---
 
@@ -84,6 +84,13 @@ Any AI model or developer starting a new chat session should read this file firs
   - **HnAlgoliaClient (`app/infrastructure/clients/hn_client.py`)**: Async client querying Algolia HN search API with tenacity retries, 429 rate limit extraction, and structured logging.
   - **RemotiveClient (`app/infrastructure/clients/remotive_client.py`)**: Async client querying Remotive's remote-jobs API with tenacity retries and 429 backoff.
   - **Unit Test Suite (`tests/unit/test_discovery_clients.py`)**: 13 comprehensive unit tests using `respx` mocking success, timeouts, 500 server retries, 429 rate limits, and corrupt payloads. Test suite expanded to **56/56 passing tests (100%)**.
+- [x] **Discovery Phase — TICKET-02: Data Normalization & Fuzzy Deduplication Layer (`lead_service`)**:
+  - **Domain Models (`app/domain/models.py`)**: Pure immutable Value Object `RawLead` (`frozen=True`) and `LeadSource` enum (`HACKER_NEWS`, `REMOTIVE`).
+  - **HTML & Text Sanitizer (`app/application/sanitizer.py`)**: Safe HTML stripping with paragraph/break newline preservation, entity unescaping (`html.unescape`), whitespace normalization, and corporate legal suffix stripping (`normalize_company_name`).
+  - **Remotive Mapper Adapter (`app/application/mappers/remotive_mapper.py`)**: Translates `RemotiveJobItem` to canonical `RawLead` with defensive timestamp and tag handling.
+  - **HN Comment Parser (`app/application/parsers/hn_parser.py`)**: Delimiter-based heuristic parser (`|` and ` - `) extracting company names, YC batch cleanup, role titles, remote status, compensation, and permalinks.
+  - **Trigram Similarity & Dedup Service (`app/application/dedup/`)**: Pure Python Jaccard trigram engine matching PostgreSQL `pg_trgm` convention, with dual-layer deduplication (exact source ID/URL + fuzzy company similarity threshold $\ge 0.85$).
+  - **Unit Test Suite (`tests/unit/test_normalization_dedup.py`)**: 11 new tests covering sanitization, mappers, parsers, and deduplication. Test suite expanded to **67/67 passing tests (100%)**.
 
 ---
 
@@ -128,11 +135,11 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
   - Pydantic models for raw response validation.
   - Resilience: `tenacity` exponential backoff, rate-limiting (429) backoff, explicit connection/read timeouts.
   - Comprehensive unit test suite with mocked HTTP responses (success, timeout, 429, malformed JSON).
-- [ ] **TICKET-02: Data normalization + dedup layer** *(Active)*
+- [x] **TICKET-02: Data normalization + dedup layer** *(Completed)*
   - Common `RawLead` schema (`company_name`, `description`, `source`, `source_url`, `posted_at`, `discovered_at`).
   - HN comment parser and Remotive mapper.
-  - PostgreSQL `pg_trgm` extension & GIN trigram index on `company_name` for fuzzy deduplication (>0.85 similarity).
-- [ ] **TICKET-03: Skill-matching scoring + persistence layer**
+  - PostgreSQL `pg_trgm` fuzzy deduplication logic and in-memory dual-layer filtering.
+- [ ] **TICKET-03: Skill-matching scoring + persistence layer** *(Active)*
   - Configurable skill-keyword matching (0–100 score) with qualification threshold.
   - `Lead` SQLAlchemy model and Alembic migration (`status='new'`).
   - Repository pattern (`LeadRepository`).
