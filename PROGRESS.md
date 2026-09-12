@@ -8,8 +8,8 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: Discovery Pipeline Phase (lead_service)
-- **Current Ticket**: TICKET-01 — Build resilient API clients for HN Algolia & Remotive
-- **Status**: In Progress
+- **Current Ticket**: TICKET-02 — Data normalization + dedup layer
+- **Status**: Ready to start (TICKET-01 Completed)
 
 ---
 
@@ -77,6 +77,13 @@ Any AI model or developer starting a new chat session should read this file firs
   - **Decoupled SRE Health Probes**: Added non-blocking `/health/live` liveness probe and dependency `/health/ready` readiness probe in [main.py](file:///e:/PERSONAL-PROJECTS/leadforix/apps/services/auth_service/app/main.py).
   - **Container Security Hardening**: Added unprivileged `appuser:appgroup` (UID/GID 10001) in [Dockerfile](file:///e:/PERSONAL-PROJECTS/leadforix/Dockerfile) per CIS Docker benchmarks.
   - **Test Suite Expansion**: Added unit tests in `test_database.py` and `test_health.py`, expanding test coverage to **43/43 passing tests (100%)**.
+- [x] **Discovery Phase — TICKET-01: Resilient API Clients (`lead_service`)**:
+  - **Dependencies Installed**: `httpx>=0.28.0`, `tenacity>=9.0.0`, and dev dependency `respx>=0.22.0`.
+  - **Domain Exception Hierarchy (`app/domain/exceptions.py`)**: `DiscoveryClientError` inheriting from `LeadforixError`, with subclasses `RateLimitExceededError` (429), `UpstreamServiceError` (502), `DiscoveryTimeoutError` (504), and `MalformedPayloadError` (502).
+  - **Raw Provider DTO Schemas (`app/infrastructure/clients/schemas.py`)**: Pydantic v2 schemas for Algolia HN Search (`HnStoryHit`, `HnCommentHit`, `HnSearchResponse`) and Remotive (`RemotiveJobItem`, `RemotiveJobsResponse`).
+  - **HnAlgoliaClient (`app/infrastructure/clients/hn_client.py`)**: Async client querying Algolia HN search API with tenacity retries, 429 rate limit extraction, and structured logging.
+  - **RemotiveClient (`app/infrastructure/clients/remotive_client.py`)**: Async client querying Remotive's remote-jobs API with tenacity retries and 429 backoff.
+  - **Unit Test Suite (`tests/unit/test_discovery_clients.py`)**: 13 comprehensive unit tests using `respx` mocking success, timeouts, 500 server retries, 429 rate limits, and corrupt payloads. Test suite expanded to **56/56 passing tests (100%)**.
 
 ---
 
@@ -116,12 +123,12 @@ Any AI model or developer starting a new chat session should read this file firs
 
 Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Search API and Remotive API. Bypasses illegal private PII scraping in favor of live, high-intent public hiring signals.
 
-- [ ] **TICKET-01: Build resilient API clients for HN Algolia & Remotive** *(Active)*
+- [x] **TICKET-01: Build resilient API clients for HN Algolia & Remotive** *(Completed)*
   - `httpx.AsyncClient`-based clients for Algolia HN Search API ("Who is hiring?") and Remotive API (software-dev jobs).
   - Pydantic models for raw response validation.
   - Resilience: `tenacity` exponential backoff, rate-limiting (429) backoff, explicit connection/read timeouts.
   - Comprehensive unit test suite with mocked HTTP responses (success, timeout, 429, malformed JSON).
-- [ ] **TICKET-02: Data normalization + dedup layer**
+- [ ] **TICKET-02: Data normalization + dedup layer** *(Active)*
   - Common `RawLead` schema (`company_name`, `description`, `source`, `source_url`, `posted_at`, `discovered_at`).
   - HN comment parser and Remotive mapper.
   - PostgreSQL `pg_trgm` extension & GIN trigram index on `company_name` for fuzzy deduplication (>0.85 similarity).
