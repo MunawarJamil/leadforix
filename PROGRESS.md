@@ -8,8 +8,8 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: Discovery Pipeline Phase (lead_service)
-- **Current Ticket**: TICKET-03 — Skill-matching scoring + persistence layer
-- **Status**: Ready to start (TICKET-02 Completed)
+- **Current Ticket**: TICKET-04 — Celery orchestration
+- **Status**: Ready to start (TICKET-03 Completed)
 
 ---
 
@@ -91,6 +91,13 @@ Any AI model or developer starting a new chat session should read this file firs
   - **HN Comment Parser (`app/application/parsers/hn_parser.py`)**: Delimiter-based heuristic parser (`|` and ` - `) extracting company names, YC batch cleanup, role titles, remote status, compensation, and permalinks.
   - **Trigram Similarity & Dedup Service (`app/application/dedup/`)**: Pure Python Jaccard trigram engine matching PostgreSQL `pg_trgm` convention, with dual-layer deduplication (exact source ID/URL + fuzzy company similarity threshold $\ge 0.85$).
   - **Unit Test Suite (`tests/unit/test_normalization_dedup.py`)**: 11 new tests covering sanitization, mappers, parsers, and deduplication. Test suite expanded to **67/67 passing tests (100%)**.
+- [x] **Discovery Phase — TICKET-03: Skill-Matching Scoring + Persistence Layer (`lead_service`)**:
+  - **Domain Models (`app/domain/models.py`)**: `LeadStatus` enum (`NEW`, `QUALIFIED`, `DISQUALIFIED`, `CONTACTED`, `ARCHIVED`), immutable `SkillMatchResult` value object, and core `Lead` domain entity with `from_raw_lead` factory method.
+  - **Skill-Matching Scoring Engine (`app/application/scoring.py`)**: `SkillMatchingEngine` with boundary-safe regex lookarounds (matching `C++`, `C#`, `.NET`, `Node.js`, `Go`), high-intent title multipliers (2.0x), normalized 0–100 scores, and qualification threshold gating.
+  - **SQLAlchemy ORM Model (`app/infrastructure/models.py`)**: `LeadModel` mapped to `leads` table with UUID mixin, UTC timestamps, JSONB columns (`matched_skills`, `raw_metadata`), and Data Mapper methods (`to_domain`, `from_domain`).
+  - **Alembic Migration 004 (`infrastructure/database/migrations/versions/004_create_lead_tables.py`)**: `004_create_lead_tables` enabling `pg_trgm`, compound index `(status, match_score)`, unique `(source, source_id)`, and trigram GIN index `ix_leads_company_name_trgm`.
+  - **Async Lead Repository (`app/infrastructure/repository.py`)**: `LeadRepository` providing async CRUD (`save`, `get_by_id`, `get_by_source_and_id`, `save_bulk`, `list_leads`, `update_status`).
+  - **Unit Test Suite**: Added `test_skill_scorer.py` and `test_lead_repository.py`. Test suite expanded to **80/80 passing tests (100%)**.
 
 ---
 
@@ -139,11 +146,11 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
   - Common `RawLead` schema (`company_name`, `description`, `source`, `source_url`, `posted_at`, `discovered_at`).
   - HN comment parser and Remotive mapper.
   - PostgreSQL `pg_trgm` fuzzy deduplication logic and in-memory dual-layer filtering.
-- [ ] **TICKET-03: Skill-matching scoring + persistence layer** *(Active)*
+- [x] **TICKET-03: Skill-matching scoring + persistence layer** *(Completed)*
   - Configurable skill-keyword matching (0–100 score) with qualification threshold.
   - `Lead` SQLAlchemy model and Alembic migration (`status='new'`).
   - Repository pattern (`LeadRepository`).
-- [ ] **TICKET-04: Celery orchestration**
+- [ ] **TICKET-04: Celery orchestration** *(Active)*
   - `discover_leads` Celery task with idempotency and partial-failure isolation.
   - Celery Beat schedule and manual trigger endpoint (`POST /discovery/run`).
 - [ ] **TICKET-05: Integration testing + polish**
