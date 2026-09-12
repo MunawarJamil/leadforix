@@ -149,3 +149,25 @@ class Lead(BaseModel):
             discovered_at=raw_lead.discovered_at,
             raw_metadata=raw_lead.raw_metadata,
         )
+
+
+    def to_raw_lead(self) -> RawLead:
+        """
+        Converts Lead domain entity back into a canonical RawLead for deduplication index matching.
+        Design Pattern: Data Mapper / Adapter
+        """
+        return RawLead(
+            company_name=self.company_name,
+            title=self.title,
+            description=self.description,
+            source=self.source,
+            source_url=self.source_url,
+            source_id=self.source_id,
+            location=self.location,
+            is_remote=self.is_remote,
+            salary_info=self.salary_info,
+            skills_raw=self.matched_skills,
+            posted_at=self.posted_at,
+            discovered_at=self.discovered_at,
+            raw_metadata=self.raw_metadata,
+        )

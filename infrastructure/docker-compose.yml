@@ -99,6 +99,18 @@ services:
     container_name: leadforix-celery-worker
     command: ["celery", "-A", "infrastructure.messaging.celery_app.celery_app", "worker", "--loglevel=info"]
 
+
+  # ---------------- Celery Beat Scheduler ----------------
+  celery_beat:
+    <<: *service-base
+    container_name: leadforix-celery-beat
+    command: ["celery", "-A", "infrastructure.messaging.celery_app.celery_app", "beat", "--loglevel=info"]
+
+
+
+
+
+
   # ---------------- FastAPI Services ----------------
   agent_service:
     <<: *service-base
