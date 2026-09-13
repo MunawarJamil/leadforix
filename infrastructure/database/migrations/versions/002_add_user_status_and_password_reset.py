@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
 # revision identifiers, used by Alembic.
-revision: str = "002_add_user_status_and_password_reset"
+revision: str = "002_user_status_pwd_reset"
 down_revision: str | None = "001_create_auth_tables"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None

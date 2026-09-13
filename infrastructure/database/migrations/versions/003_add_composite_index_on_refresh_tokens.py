@@ -10,8 +10,8 @@ from collections.abc import Sequence
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "003_add_composite_index_on_refresh_tokens"
-down_revision: str | None = "002_add_user_status_and_password_reset"
+revision: str = "003_refresh_tokens_idx"
+down_revision: str | None = "002_user_status_pwd_reset"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

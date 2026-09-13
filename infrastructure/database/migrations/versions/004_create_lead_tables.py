@@ -1,7 +1,7 @@
 """create lead tables
 
-Revision ID: 004_create_lead_tables
-Revises: 003_add_composite_index_on_refresh_tokens
+Revision ID: 004_lead_tables
+Revises : 003_refresh_tokens_idx
 Create Date: 2026-09-13 00:00:00.000000
 
 """
@@ -13,8 +13,9 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 # revision identifiers, used by Alembic.
-revision: str = "004_create_lead_tables"
-down_revision: str | None = "003_add_composite_index_on_refresh_tokens"
+revision: str = "004_lead_tables"
+down_revision: str | None = "003_refresh_tokens_idx"
+
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

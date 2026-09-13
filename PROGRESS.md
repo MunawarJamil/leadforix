@@ -111,6 +111,10 @@ Any AI model or developer starting a new chat session should read this file firs
   - **Cleanups & Logging Review**: Cleaned unused imports, verified zero TODOs/FIXMEs, validated rich structured contextual logging on all pipeline events.
   - **Code Coverage Target Achieved**: 88% statement coverage across `apps/services/lead_service/app` (exceeding $\ge 80\%$ target). 96/96 tests passing.
   - **README Documentation**: Added comprehensive architecture diagrams, manual trigger guide, Celery Beat periodic schedule details, and custom skill profile instructions.
+  - **Live Swagger API Verification & DB Migration Fix**:
+    - Resolved Alembic `VARCHAR(32)` column truncation by shortening revisions to `002_user_status_pwd_reset`, `003_refresh_tokens_idx`, and `004_lead_tables`.
+    - Validated interactive Swagger UI (`/docs`) with JWT Bearer authentication, successfully triggering `POST /discovery/run` and polling `GET /discovery/status/{task_id}`.
+    - Verified real live multi-source ingestion (21 leads fetched across Hacker News and Remotive, 9 qualified, 100% persisted into PostgreSQL with trigram indices and scores).
 
 ---
 
