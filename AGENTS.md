@@ -204,16 +204,16 @@ For infra changes: verify actual runtime behavior, not just config syntax.
 - Unified exceptions, connection pool tuning, non-blocking async bcrypt, and structured logging.
 - Complete authentication service (`auth_service`): salted bcrypt, JWT access & opaque refresh tokens, single-use token rotation, RFC 6819 reuse detection, session revocation, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), account statuses (`ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION`), password reset foundation.
 - Shared stateless security module (`shared/security/`): `UserPrincipal`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, `require_workspace`.
-- Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (96/96 passed).
-- **Phase 1: Discovery Pipeline (`lead_service`) — Complete**:
+- Decoupled health probes (`/health/live`, `/health/ready`), container hardening.
+- **Phase 1: Discovery Pipeline (`lead_service`) — Complete (109/109 tests passed, 86% coverage)**:
   - [x] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
   - [x] **TICKET-02**: Data normalization + dedup layer (`RawLead` schema, HN parser, Remotive mapper, PostgreSQL `pg_trgm` fuzzy deduplication)
   - [x] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration 004, `LeadRepository`)
   - [x] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
-  - [x] **TICKET-05**: Integration testing + polish (live API integration, 429 rate-limit resilience, 88% test coverage, comprehensive README documentation)
-  - [x] **Swagger API Verification**: Live interactive Swagger verification completed with JWT bearer token, background Celery worker processing, and PostgreSQL persistence.
+  - [x] **TICKET-05**: Integration testing + polish (live API integration, 429 rate-limit resilience, 88% test coverage, comprehensive README documentation, live Swagger verification)
+  - [x] **DAY-06**: Arbeitnow Free Job Board API integration (`ArbeitnowClient`, `ArbeitnowMapper`, multi-source Bulkhead isolation, 13 new unit tests, 109/109 tests passing).
 
-**Next**: Day 6 — Integrate Arbeitnow Free Job Board API (`lead_service`) as the 3rd discovery provider before Phase 2 Agentic AI.
+**Next**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant).
 
 
 

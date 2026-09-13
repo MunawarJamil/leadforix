@@ -116,7 +116,7 @@ async def test_live_discovery_pipeline_end_to_end() -> None:
         assert lead.id is not None
         assert lead.company_name
         assert lead.title
-        assert lead.source in (LeadSource.HACKER_NEWS, LeadSource.REMOTIVE)
+        assert lead.source in (LeadSource.HACKER_NEWS, LeadSource.REMOTIVE, LeadSource.ARBEITNOW)
         assert 0 <= lead.match_score <= 100
         assert lead.status in (LeadStatus.QUALIFIED, LeadStatus.DISQUALIFIED)
         if lead.status == LeadStatus.QUALIFIED:

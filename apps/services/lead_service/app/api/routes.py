@@ -31,6 +31,8 @@ class DiscoveryTriggerRequest(BaseModel):
     hn_limit: int = Field(default=100, ge=1, le=1000, description="Max HN comments to inspect")
     remotive_limit: int | None = Field(default=100, ge=1, le=500, description="Max Remotive jobs to fetch")
     remotive_category: str = Field(default="software-dev", description="Remotive job category")
+    arbeitnow_page: int = Field(default=1, ge=1, le=100, description="Arbeitnow API page number to fetch")
+
     save_only_qualified: bool = Field(
         default=False,
         description="If True, only leads meeting qualification threshold are persisted",
@@ -76,6 +78,7 @@ async def trigger_discovery(
         hn_limit=req.hn_limit,
         remotive_limit=req.remotive_limit,
         remotive_category=req.remotive_category,
+        arbeitnow_page=req.arbeitnow_page,
         save_only_qualified=req.save_only_qualified,
     )
 

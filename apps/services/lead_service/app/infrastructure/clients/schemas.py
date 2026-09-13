@@ -80,3 +80,36 @@ class RemotiveJobsResponse(BaseModel):
 
     job_count: int = Field(alias="job-count", default=0)
     jobs: list[RemotiveJobItem] = Field(default_factory=list)
+
+
+
+# ---------------------------------------------------------------------------
+# Arbeitnow Job Board API DTOs
+# ---------------------------------------------------------------------------
+
+
+class ArbeitnowJobItem(BaseModel):
+    """Represents an individual job listing from the Arbeitnow API."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    slug: str
+    company_name: str
+    title: str
+    description: str = ""
+    remote: bool = False
+    url: str
+    tags: list[str] = Field(default_factory=list)
+    job_types: list[str] = Field(default_factory=list)
+    location: str | None = None
+    created_at: int | None = None  # Unix epoch timestamp in seconds
+
+
+class ArbeitnowResponse(BaseModel):
+    """Top-level response envelope from Arbeitnow job-board API."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    data: list[ArbeitnowJobItem] = Field(default_factory=list)
+    links: dict[str, Any] = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)

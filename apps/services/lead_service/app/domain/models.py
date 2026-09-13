@@ -20,6 +20,7 @@ class LeadSource(StrEnum):
 
     HACKER_NEWS = "hacker_news"
     REMOTIVE = "remotive"
+    ARBEITNOW = "arbeitnow"
 
 
 class LeadStatus(StrEnum):
