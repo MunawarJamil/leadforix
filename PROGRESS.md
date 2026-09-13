@@ -7,10 +7,10 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Phase**: Phase 1 Discovery Pipeline Extension (`lead_service`) — **Day 6: Arbeitnow API Integration**
-- **Current Ticket**: DAY-06: Integrate Arbeitnow Free Job Board API
-- **Next Phase**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant)
-- **Status**: Live Swagger testing verified (21 real leads persisted, 96/96 tests passing). Day 6 implementation plan ready.
+- **Current Phase**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant)
+- **Current Ticket**: DAY-07: Phase 2 Kickoff — Agent Service Architecture & LangGraph Foundation
+- **Next Phase**: Phase 3 — Agency Expansion (multi-tenancy, multi-seat, client campaigns)
+- **Status**: Day 6 Arbeitnow Free Job Board Integration complete (109/109 tests passing, 86% coverage). Phase 1 Discovery Pipeline fully completed with 3 concurrent live providers (Hacker News, Remotive, Arbeitnow).
 
 ---
 
@@ -173,16 +173,14 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
 - [x] **TICKET-05: Integration testing + polish** *(Completed)*
   - End-to-end pipeline verification against live APIs, structured logging review, 88% test coverage, and documentation.
 
-### Day 6: Arbeitnow API Integration (`lead_service`) — Ready to Start
-Scope: Third live discovery provider integration alongside Hacker News and Remotive. 100% free unauthenticated job board (250+ live tech/remote jobs per call).
-- Branch: `feat/lf-06-arbeitnow-integration`
-- Implementation Plan: `implementation_plan.md`
-- Tasks:
-  - [ ] **Step 1**: Add `ARBEITNOW = "arbeitnow"` to `LeadSource` enum & Pydantic response models (`ArbeitnowJobItem`, `ArbeitnowResponse` in `schemas.py`).
-  - [ ] **Step 2**: Build `ArbeitnowClient` with `httpx`, `tenacity` retries, and typed domain exceptions (`RateLimitExceededError`, `UpstreamServiceError`, `DiscoveryTimeoutError`).
-  - [ ] **Step 3**: Implement `ArbeitnowMapper` converting `ArbeitnowJobItem` to canonical `RawLead` (HTML stripping, legal suffix normalization, date parsing).
-  - [ ] **Step 4**: Wire Arbeitnow into `DiscoveryPipelineService` (`asyncio.gather`), Celery background task, and FastAPI routes with Bulkhead isolation.
-  - [ ] **Step 5**: Unit tests with `respx` mocks, full test suite run, and live verification via Swagger UI.
+- [x] **Day 6: Arbeitnow API Integration (`lead_service`)** *(Completed)*:
+  - Third live discovery provider integration alongside Hacker News and Remotive. 100% free unauthenticated job board (250+ live tech/remote jobs per call).
+  - Branch: `feat/lf-06-arbeitnow-integration`
+  - [x] **Step 1**: Added `ARBEITNOW = "arbeitnow"` to `LeadSource` enum & Pydantic response models (`ArbeitnowJobItem`, `ArbeitnowResponse` in `schemas.py`).
+  - [x] **Step 2**: Built `ArbeitnowClient` with `httpx`, `tenacity` exponential backoff, and typed domain exceptions (`RateLimitExceededError`, `UpstreamServiceError`, `DiscoveryTimeoutError`).
+  - [x] **Step 3**: Implemented `ArbeitnowMapper` converting `ArbeitnowJobItem` to canonical `RawLead` (HTML stripping, location fallback, epoch timestamp parsing).
+  - [x] **Step 4**: Wired Arbeitnow into `DiscoveryPipelineService` (`asyncio.gather`), Celery background task (`discover_leads_task`), and FastAPI routes with Bulkhead isolation.
+  - [x] **Step 5**: Unit test suite in `tests/unit/test_arbeitnow.py` with `respx` mocks, 100% test pass rate across all suites (109/109 passed), and 86% code coverage.
 
 ---
 

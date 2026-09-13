@@ -17,10 +17,12 @@ import time
 from typing import Any
 
 from apps.services.lead_service.app.application.dedup.service import DedupService
+from apps.services.lead_service.app.application.mappers.arbeitnow_mapper import ArbeitnowMapper
 from apps.services.lead_service.app.application.mappers.remotive_mapper import RemotiveMapper
 from apps.services.lead_service.app.application.parsers.hn_parser import HnCommentParser
-from apps.services.lead_service.app.application.scoring import SkillConfig, SkillMatchingEngine
-from apps.services.lead_service.app.domain.models import Lead, LeadSource, RawLead
+from apps.services.lead_service.app.application.scoring import SkillMatchingEngine
+from apps.services.lead_service.app.domain.models import Lead, RawLead
+from apps.services.lead_service.app.infrastructure.clients.arbeitnow_client import ArbeitnowClient
 from apps.services.lead_service.app.infrastructure.clients.hn_client import HnAlgoliaClient
 from apps.services.lead_service.app.infrastructure.clients.remotive_client import RemotiveClient
 from apps.services.lead_service.app.infrastructure.repository import LeadRepository
@@ -46,6 +48,7 @@ class DiscoveryResult:
     duration_seconds: float
     started_at: datetime
     completed_at: datetime
+    arbeitnow_fetched: int = 0
     provider_errors: dict[str, str] = field(default_factory=dict)
 
 
@@ -60,12 +63,14 @@ class DiscoveryPipelineService:
         repository: LeadRepository,
         hn_client: HnAlgoliaClient | None = None,
         remotive_client: RemotiveClient | None = None,
+        arbeitnow_client: ArbeitnowClient | None = None,
         dedup_service: DedupService | None = None,
         scoring_engine: SkillMatchingEngine | None = None,
     ) -> None:
         self._repository = repository
         self._hn_client = hn_client or HnAlgoliaClient()
         self._remotive_client = remotive_client or RemotiveClient()
+        self._arbeitnow_client = arbeitnow_client or ArbeitnowClient()
         self._dedup_service = dedup_service or DedupService()
         self._scoring_engine = scoring_engine or SkillMatchingEngine()
 
@@ -74,6 +79,7 @@ class DiscoveryPipelineService:
         hn_limit: int = 100,
         remotive_limit: int | None = 100,
         remotive_category: str = "software-dev",
+        arbeitnow_page: int = 1,
         save_only_qualified: bool = False,
     ) -> DiscoveryResult:
         """
@@ -85,17 +91,28 @@ class DiscoveryPipelineService:
 
         logger.info(
             "Starting discovery pipeline execution",
-            extra={"hn_limit": hn_limit, "remotive_limit": remotive_limit},
+            extra={
+                "hn_limit": hn_limit,
+                "remotive_limit": remotive_limit,
+                "arbeitnow_page": arbeitnow_page,
+            },
         )
 
         # Step 1: Parallel upstream fetch with Bulkhead isolation
         hn_task = self._fetch_hacker_news(limit=hn_limit)
         remotive_task = self._fetch_remotive(category=remotive_category, limit=remotive_limit)
+        arbeitnow_task = self._fetch_arbeitnow(page=arbeitnow_page)
 
-        fetch_results = await asyncio.gather(hn_task, remotive_task, return_exceptions=True)
+        fetch_results = await asyncio.gather(
+            hn_task,
+            remotive_task,
+            arbeitnow_task,
+            return_exceptions=True,
+        )
 
         hn_leads: list[RawLead] = []
         remotive_leads: list[RawLead] = []
+        arbeitnow_leads: list[RawLead] = []
 
         if isinstance(fetch_results[0], Exception):
             err_msg = str(fetch_results[0])
@@ -111,10 +128,18 @@ class DiscoveryPipelineService:
         else:
             remotive_leads = fetch_results[1]
 
-        candidates = hn_leads + remotive_leads
+        if isinstance(fetch_results[2], Exception):
+            err_msg = str(fetch_results[2])
+            logger.error("Arbeitnow ingestion failed: %s", err_msg, exc_info=fetch_results[2])
+            provider_errors["arbeitnow"] = err_msg
+        else:
+            arbeitnow_leads = fetch_results[2]
+
+        candidates = hn_leads + remotive_leads + arbeitnow_leads
         total_fetched = len(candidates)
         hn_fetched = len(hn_leads)
         remotive_fetched = len(remotive_leads)
+        arbeitnow_fetched = len(arbeitnow_leads)
 
         logger.info(
             "Upstream fetch completed",
@@ -122,6 +147,7 @@ class DiscoveryPipelineService:
                 "total_fetched": total_fetched,
                 "hn_fetched": hn_fetched,
                 "remotive_fetched": remotive_fetched,
+                "arbeitnow_fetched": arbeitnow_fetched,
                 "errors": list(provider_errors.keys()),
             },
         )
@@ -140,6 +166,7 @@ class DiscoveryPipelineService:
                 duration_seconds=round(time.monotonic() - start_time, 3),
                 started_at=started_at,
                 completed_at=completed_at,
+                arbeitnow_fetched=0,
                 provider_errors=provider_errors,
             )
 
@@ -200,6 +227,7 @@ class DiscoveryPipelineService:
             duration_seconds=duration,
             started_at=started_at,
             completed_at=completed_at,
+            arbeitnow_fetched=arbeitnow_fetched,
             provider_errors=provider_errors,
         )
 
@@ -212,3 +240,8 @@ class DiscoveryPipelineService:
         """Fetches and maps remote jobs from Remotive API."""
         jobs = await self._remotive_client.fetch_remote_jobs(category=category, limit=limit)
         return RemotiveMapper.map_many(jobs)
+
+    async def _fetch_arbeitnow(self, page: int = 1) -> list[RawLead]:
+        """Fetches and maps job listings from Arbeitnow API."""
+        jobs = await self._arbeitnow_client.fetch_jobs(page=page)
+        return ArbeitnowMapper.map_many(jobs)

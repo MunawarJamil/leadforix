@@ -40,6 +40,7 @@ def _serialize_result(result: DiscoveryResult) -> dict[str, Any]:
         "total_fetched": result.total_fetched,
         "hn_fetched": result.hn_fetched,
         "remotive_fetched": result.remotive_fetched,
+        "arbeitnow_fetched": result.arbeitnow_fetched,
         "duplicates_dropped": result.duplicates_dropped,
         "total_unique": result.total_unique,
         "qualified_count": result.qualified_count,
@@ -56,19 +57,27 @@ async def _run_pipeline_async(
     hn_limit: int,
     remotive_limit: int | None,
     remotive_category: str,
+    arbeitnow_page: int,
     save_only_qualified: bool,
 ) -> DiscoveryResult:
     """Executes the pipeline within an isolated async DB transaction scope."""
-    async with async_session_factory() as session:
-        async with session.begin():
-            repository = LeadRepository(session)
-            pipeline = DiscoveryPipelineService(repository=repository)
-            return await pipeline.run(
-                hn_limit=hn_limit,
-                remotive_limit=remotive_limit,
-                remotive_category=remotive_category,
-                save_only_qualified=save_only_qualified,
-            )
+    from shared.database.session import engine
+
+    try:
+        async with async_session_factory() as session:
+            async with session.begin():
+                repository = LeadRepository(session)
+                pipeline = DiscoveryPipelineService(repository=repository)
+                return await pipeline.run(
+                    hn_limit=hn_limit,
+                    remotive_limit=remotive_limit,
+                    remotive_category=remotive_category,
+                    arbeitnow_page=arbeitnow_page,
+                    save_only_qualified=save_only_qualified,
+                )
+    finally:
+        # Prevent asyncpg event-loop mismatch across subsequent asyncio.run() task invocations
+        await engine.dispose()
 
 
 @celery_app.task(
@@ -82,6 +91,7 @@ def discover_leads_task(
     hn_limit: int = 100,
     remotive_limit: int | None = 100,
     remotive_category: str = "software-dev",
+    arbeitnow_page: int = 1,
     save_only_qualified: bool = False,
 ) -> dict[str, Any]:
     """
@@ -116,7 +126,12 @@ def discover_leads_task(
 
     logger.info(
         "Beginning lead discovery background task",
-        extra={"task_id": self.request.id, "hn_limit": hn_limit, "remotive_limit": remotive_limit},
+        extra={
+            "task_id": self.request.id,
+            "hn_limit": hn_limit,
+            "remotive_limit": remotive_limit,
+            "arbeitnow_page": arbeitnow_page,
+        },
     )
 
     try:
@@ -126,6 +141,7 @@ def discover_leads_task(
                 hn_limit=hn_limit,
                 remotive_limit=remotive_limit,
                 remotive_category=remotive_category,
+                arbeitnow_page=arbeitnow_page,
                 save_only_qualified=save_only_qualified,
             )
         )

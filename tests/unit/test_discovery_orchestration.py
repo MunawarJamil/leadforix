@@ -71,6 +71,14 @@ def sample_remotive_job() -> RemotiveJobItem:
     )
 
 
+@pytest.fixture
+def mock_arbeitnow() -> AsyncMock:
+    """Mock ArbeitnowClient returning empty list by default."""
+    client = AsyncMock()
+    client.fetch_jobs.return_value = []
+    return client
+
+
 # =====================================================================
 # 1. Pipeline Service Layer Tests
 # =====================================================================
@@ -80,6 +88,7 @@ async def test_pipeline_run_success_both_providers(
     mock_repository: AsyncMock,
     sample_hn_comment: HnCommentHit,
     sample_remotive_job: RemotiveJobItem,
+    mock_arbeitnow: AsyncMock,
 ) -> None:
     """Verifies successful end-to-end execution when both providers respond."""
     hn_client = AsyncMock()
@@ -93,6 +102,7 @@ async def test_pipeline_run_success_both_providers(
         repository=mock_repository,
         hn_client=hn_client,
         remotive_client=remotive_client,
+        arbeitnow_client=mock_arbeitnow,
     )
 
     result = await pipeline.run(hn_limit=10, remotive_limit=10)
@@ -112,6 +122,7 @@ async def test_pipeline_run_success_both_providers(
 async def test_pipeline_partial_failure_hn_fails_remotive_succeeds(
     mock_repository: AsyncMock,
     sample_remotive_job: RemotiveJobItem,
+    mock_arbeitnow: AsyncMock,
 ) -> None:
     """Verifies Bulkhead fault isolation: HN 429 error does not abort Remotive ingestion."""
     hn_client = AsyncMock()
@@ -126,6 +137,7 @@ async def test_pipeline_partial_failure_hn_fails_remotive_succeeds(
         repository=mock_repository,
         hn_client=hn_client,
         remotive_client=remotive_client,
+        arbeitnow_client=mock_arbeitnow,
     )
 
     result = await pipeline.run(hn_limit=10, remotive_limit=10)
@@ -142,6 +154,7 @@ async def test_pipeline_partial_failure_hn_fails_remotive_succeeds(
 async def test_pipeline_partial_failure_remotive_fails_hn_succeeds(
     mock_repository: AsyncMock,
     sample_hn_comment: HnCommentHit,
+    mock_arbeitnow: AsyncMock,
 ) -> None:
     """Verifies Bulkhead fault isolation: Remotive 502 error does not abort HN ingestion."""
     hn_client = AsyncMock()
@@ -157,6 +170,7 @@ async def test_pipeline_partial_failure_remotive_fails_hn_succeeds(
         repository=mock_repository,
         hn_client=hn_client,
         remotive_client=remotive_client,
+        arbeitnow_client=mock_arbeitnow,
     )
 
     result = await pipeline.run(hn_limit=10, remotive_limit=10)
@@ -172,6 +186,7 @@ async def test_pipeline_partial_failure_remotive_fails_hn_succeeds(
 @pytest.mark.asyncio
 async def test_pipeline_both_providers_fail(
     mock_repository: AsyncMock,
+    mock_arbeitnow: AsyncMock,
 ) -> None:
     """Verifies pipeline gracefully returns 0 results when all upstream providers fail."""
     hn_client = AsyncMock()
@@ -180,10 +195,13 @@ async def test_pipeline_both_providers_fail(
     remotive_client = AsyncMock()
     remotive_client.fetch_remote_jobs.side_effect = UpstreamServiceError(provider="remotive", status_code=503)
 
+    mock_arbeitnow.fetch_jobs.side_effect = UpstreamServiceError(provider="arbeitnow", status_code=503)
+
     pipeline = DiscoveryPipelineService(
         repository=mock_repository,
         hn_client=hn_client,
         remotive_client=remotive_client,
+        arbeitnow_client=mock_arbeitnow,
     )
 
     result = await pipeline.run()
@@ -192,6 +210,7 @@ async def test_pipeline_both_providers_fail(
     assert result.persisted_count == 0
     assert "hacker_news" in result.provider_errors
     assert "remotive" in result.provider_errors
+    assert "arbeitnow" in result.provider_errors
     mock_repository.save_bulk.assert_not_called()
 
 
@@ -199,6 +218,7 @@ async def test_pipeline_both_providers_fail(
 async def test_pipeline_deduplication_filters_duplicates(
     mock_repository: AsyncMock,
     sample_hn_comment: HnCommentHit,
+    mock_arbeitnow: AsyncMock,
 ) -> None:
     """Verifies that duplicates between history and candidate batch are dropped."""
     # Simulate an existing historical lead matching sample_hn_comment
@@ -226,6 +246,7 @@ async def test_pipeline_deduplication_filters_duplicates(
         repository=mock_repository,
         hn_client=hn_client,
         remotive_client=remotive_client,
+        arbeitnow_client=mock_arbeitnow,
     )
 
     result = await pipeline.run()
