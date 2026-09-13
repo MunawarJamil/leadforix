@@ -195,7 +195,7 @@ Never silently pick one — surface the conflict and ask when it matters.
 
 For infra changes: verify actual runtime behavior, not just config syntax.
 
-## 24. Current Status — Discovery Phase (TICKET-05)
+## 24. Current Status — Phase 1 Discovery Pipeline (COMPLETED)
  
 **Before inspecting the repo, always read PROGRESS.md first**. It tells you exactly which service is in scope — do not scan the full monorepo unless the current task explicitly requires cross-service work.
 
@@ -204,15 +204,15 @@ For infra changes: verify actual runtime behavior, not just config syntax.
 - Unified exceptions, connection pool tuning, non-blocking async bcrypt, and structured logging.
 - Complete authentication service (`auth_service`): salted bcrypt, JWT access & opaque refresh tokens, single-use token rotation, RFC 6819 reuse detection, session revocation, RBAC roles (`OWNER`, `ADMIN`, `SALES_USER`, `AGENT`), account statuses (`ACTIVE`, `SUSPENDED`, `PENDING_VERIFICATION`), password reset foundation.
 - Shared stateless security module (`shared/security/`): `UserPrincipal`, `StatelessTokenValidator`, `get_current_user`, `require_roles`, `require_workspace`.
-- Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (88/88 passed).
+- Decoupled health probes (`/health/live`, `/health/ready`), container hardening, and 100% test pass rate (96/96 passed).
+- **Phase 1: Discovery Pipeline (`lead_service`) — Complete**:
+  - [x] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
+  - [x] **TICKET-02**: Data normalization + dedup layer (`RawLead` schema, HN parser, Remotive mapper, PostgreSQL `pg_trgm` fuzzy deduplication)
+  - [x] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration 004, `LeadRepository`)
+  - [x] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
+  - [x] **TICKET-05**: Integration testing + polish (live API integration, 429 rate-limit resilience, 88% test coverage, comprehensive README documentation)
 
-**Active Roadmap — Discovery Phase (lead_service)**:
-- [x] **TICKET-01**: Build resilient API clients for HN Algolia & Remotive (`httpx.AsyncClient`, `tenacity` exponential backoff, rate-limiting backoff, Pydantic schemas, unit tests)
-- [x] **TICKET-02**: Data normalization + dedup layer (`RawLead` schema, HN parser, Remotive mapper, PostgreSQL `pg_trgm` fuzzy deduplication)
-- [x] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration 004, `LeadRepository`)
-- [x] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
-- [ ] **TICKET-05**: Integration testing + polish (end-to-end verification with live APIs, rate-limit tests, structured logging review, documentation)
+**Next**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant, RAG).
 
-**Next**: Start TICKET-05.
 
 

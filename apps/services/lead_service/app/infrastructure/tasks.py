@@ -11,11 +11,10 @@ import asyncio
 from datetime import datetime, timezone
 import logging
 import os
+import redis
 from typing import Any
 
 from celery import shared_task
-import redis
-
 from apps.services.lead_service.app.application.pipeline import DiscoveryPipelineService, DiscoveryResult
 from apps.services.lead_service.app.infrastructure.repository import LeadRepository
 from infrastructure.messaging.celery_app import celery_app
@@ -140,7 +139,7 @@ def discover_leads_task(
             extra={"task_id": self.request.id},
         )
         # Retry with exponential backoff on infrastructure failures
-        raise self.retry(exc=exc, countdown=60 * (2 ** self.request.retries))
+        raise self.retry(exc=exc, countdown=60 * (2 ** self.request.retries)) from exc
 
     finally:
         try:

@@ -17,9 +17,8 @@ import pytest
 from apps.services.lead_service.app.api.routes import router as discovery_router
 from apps.services.lead_service.app.application.dedup.service import DedupService
 from apps.services.lead_service.app.application.pipeline import DiscoveryPipelineService, DiscoveryResult
-from apps.services.lead_service.app.application.scoring import SkillConfig, SkillMatchingEngine
 from apps.services.lead_service.app.domain.exceptions import RateLimitExceededError, UpstreamServiceError
-from apps.services.lead_service.app.domain.models import Lead, LeadSource, LeadStatus, RawLead
+from apps.services.lead_service.app.domain.models import Lead, LeadSource, LeadStatus
 from apps.services.lead_service.app.infrastructure.clients.schemas import (
     HnCommentHit,
     HnStoryHit,

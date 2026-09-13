@@ -8,7 +8,6 @@ Design Patterns:
 
 from datetime import datetime, timezone
 from typing import Any
-from uuid import UUID
 
 from sqlalchemy import Boolean, DateTime, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
