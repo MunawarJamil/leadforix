@@ -1,6 +1,14 @@
-import os
+"""
+Central Celery application configuration and periodic task scheduler (Celery Beat).
 
+Design Patterns:
+- Centralized Configuration: Shared broker and result backend settings across workers.
+- Declarative Scheduler: Cron-style periodic task dispatching (Celery Beat).
+"""
+
+import os
 from celery import Celery
+from celery.schedules import crontab
 
 broker_url = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 result_backend = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
@@ -18,6 +26,21 @@ celery_app.conf.update(
     accept_content=["json"],
     timezone="UTC",
     enable_utc=True,
+    imports=[
+        "apps.services.lead_service.app.infrastructure.tasks",
+    ],
+    beat_schedule={
+        "discover_leads_every_6_hours": {
+            "task": "lead_service.discover_leads",
+            "schedule": crontab(minute=0, hour="*/6"),  # At minute 0 past every 6th hour
+            "kwargs": {
+                "hn_limit": 100,
+                "remotive_limit": 100,
+                "remotive_category": "software-dev",
+                "save_only_qualified": False,
+            },
+        },
+    },
 )
 
 

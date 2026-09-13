@@ -7,9 +7,10 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Phase**: Discovery Pipeline Phase (lead_service)
-- **Current Ticket**: TICKET-04 — Celery orchestration
-- **Status**: Ready to start (TICKET-03 Completed)
+- **Current Phase**: Phase 1: Discovery & Lead Pipeline (`lead_service`) — **COMPLETED**
+- **Current Ticket**: TICKET-05 — Integration testing + polish (Completed)
+- **Next Phase**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant)
+- **Status**: Phase 1 fully verified with live APIs, resilience testing, 88% test coverage (96/96 passing)
 
 ---
 
@@ -98,6 +99,18 @@ Any AI model or developer starting a new chat session should read this file firs
   - **Alembic Migration 004 (`infrastructure/database/migrations/versions/004_create_lead_tables.py`)**: `004_create_lead_tables` enabling `pg_trgm`, compound index `(status, match_score)`, unique `(source, source_id)`, and trigram GIN index `ix_leads_company_name_trgm`.
   - **Async Lead Repository (`app/infrastructure/repository.py`)**: `LeadRepository` providing async CRUD (`save`, `get_by_id`, `get_by_source_and_id`, `save_bulk`, `list_leads`, `update_status`).
   - **Unit Test Suite**: Added `test_skill_scorer.py` and `test_lead_repository.py`. Test suite expanded to **80/80 passing tests (100%)**.
+- [x] **Discovery Phase — TICKET-04: Celery Orchestration (`lead_service`)**:
+  - **Pipeline Application Service (`apps/services/lead_service/app/application/pipeline.py`)**: `DiscoveryPipelineService` coordinating multi-source fetch, Bulkhead partial-failure isolation, deduplication via historical leads, regex skill-scoring, and batch persistence (`DiscoveryResult`).
+  - **Celery Background Task (`apps/services/lead_service/app/infrastructure/tasks.py`)**: `lead_service.discover_leads` with Redis distributed lock mutex (`lock:leadforix:lead_discovery`) for strict idempotency, async event-loop bridge, and exponential retry backoff.
+  - **Celery Beat Periodic Scheduler (`infrastructure/messaging/celery_app.py`, `infrastructure/docker-compose.yml`)**: Automated crontab schedule running discovery every 6 hours, plus dedicated `celery_beat` Docker container definition.
+  - **FastAPI Management Endpoints (`apps/services/lead_service/app/api/routes.py`)**: `POST /discovery/run` (HTTP 202 Accepted, RBAC protected) and `GET /discovery/status/{task_id}` for polling Celery AsyncResult execution state.
+  - **Unit Test Suite (`tests/unit/test_discovery_orchestration.py`)**: 8 comprehensive tests covering multi-source orchestration, fault injection, concurrency lock skips, and API endpoints. Test suite expanded to **88/88 passing tests (100%)**.
+- [x] **Discovery Phase — TICKET-05: Integration Testing + Polish (`lead_service`)**:
+  - **Live E2E Integration Suite (`tests/integration/test_discovery_live.py`)**: Real HTTP calls against Algolia HN and Remotive APIs validating parsing, mapping, scoring, deduplication, and persistence schema fidelity.
+  - **Resilience & Fault Injection (`tests/integration/test_discovery_resilience.py`)**: Validated HTTP 429 rate limits, `Retry-After` backoff, socket timeouts, and malformed payload survivability with zero crashes or data loss.
+  - **Cleanups & Logging Review**: Cleaned unused imports, verified zero TODOs/FIXMEs, validated rich structured contextual logging on all pipeline events.
+  - **Code Coverage Target Achieved**: 88% statement coverage across `apps/services/lead_service/app` (exceeding $\ge 80\%$ target). 96/96 tests passing.
+  - **README Documentation**: Added comprehensive architecture diagrams, manual trigger guide, Celery Beat periodic schedule details, and custom skill profile instructions.
 
 ---
 
@@ -150,11 +163,11 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
   - Configurable skill-keyword matching (0–100 score) with qualification threshold.
   - `Lead` SQLAlchemy model and Alembic migration (`status='new'`).
   - Repository pattern (`LeadRepository`).
-- [ ] **TICKET-04: Celery orchestration** *(Active)*
+- [x] **TICKET-04: Celery orchestration** *(Completed)*
   - `discover_leads` Celery task with idempotency and partial-failure isolation.
   - Celery Beat schedule and manual trigger endpoint (`POST /discovery/run`).
-- [ ] **TICKET-05: Integration testing + polish**
-  - End-to-end pipeline verification against live APIs, structured logging review, and documentation.
+- [x] **TICKET-05: Integration testing + polish** *(Completed)*
+  - End-to-end pipeline verification against live APIs, structured logging review, 88% test coverage, and documentation.
 
 ---
 

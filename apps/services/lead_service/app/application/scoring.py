@@ -7,8 +7,7 @@ Design Patterns:
 """
 
 import re
-from dataclasses import dataclass, field
-from typing import Mapping
+from dataclasses import dataclass
 
 from apps.services.lead_service.app.domain.models import RawLead, SkillMatchResult
 

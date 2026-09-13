@@ -300,3 +300,5 @@ class DeduplicationService:
                 )
 
         return accepted
+# Alias for backwards compatibility / shorthand
+DedupService = DeduplicationService

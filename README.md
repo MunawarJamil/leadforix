@@ -152,6 +152,97 @@ Outreach → (Reply → update state | No reply → follow-up)
 
 LangGraph checkpointing is key for maintaining context across interactions with a lead.
 
+## Discovery Pipeline (`lead_service`)
+
+Leadforix's Discovery Pipeline ingests high-intent, public hiring signals from Hacker News ("Who is hiring?") and Remotive (software-dev opportunities). By focusing on publicly posted hiring needs rather than personal PII scraping, it eliminates GDPR/CAN-SPAM liability while surfacing live opportunities.
+
+### Architecture & Data Flow
+
+```
+[Celery Beat Schedule] OR [POST /api/lead/discovery/run]
+                     │
+                     ▼
+       Celery Task: discover_leads (Redis Mutex Lock)
+                     │
+           ┌─────────┴─────────┐  (Parallel / Bulkhead Fault Isolation)
+           ▼                   ▼
+     HN Client           Remotive Client
+     (Tenacity Backoff)  (Tenacity Backoff)
+           │                   │
+       HN Parser        Remotive Mapper
+           └─────────┬─────────┘
+                     ▼
+          HTML / Text Sanitizer
+                     ▼
+       DeduplicationService (Inverted Trigram Index + URL/ID Hash)
+                     ▼
+       SkillMatchingEngine (0–100 Score, Regex Boundaries, Title Multiplier)
+                     ▼
+           LeadRepository.save_bulk() → PostgreSQL
+```
+
+### Manual Discovery Trigger
+
+Operators and authorized users (`OWNER`, `ADMIN`, `SALES_USER`) can trigger discovery on demand:
+
+```bash
+# 1. Trigger asynchronous discovery run
+curl -X POST "http://localhost/api/lead/discovery/run" \
+  -H "Authorization: Bearer <JWT_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "hn_limit": 100,
+    "remotive_limit": 100,
+    "remotive_category": "software-dev",
+    "save_only_qualified": false
+  }'
+
+# Response (HTTP 202 Accepted):
+# {"task_id": "4b68e920-...", "status": "PENDING", "message": "Discovery workflow dispatched successfully."}
+
+# 2. Check task execution status
+curl -X GET "http://localhost/api/lead/discovery/status/4b68e920-..." \
+  -H "Authorization: Bearer <JWT_ACCESS_TOKEN>"
+```
+
+### Automated Scheduling (Celery Beat)
+
+Celery Beat triggers `lead_service.discover_leads` periodically every 6 hours (`crontab(minute=0, hour="*/6")`).
+- **Distributed Mutex Lock**: A Redis lock (`lock:leadforix:lead_discovery`) guarantees idempotency; overlapping runs automatically skip without duplicate API calls or database contention.
+- **Bulkhead Isolation**: If one upstream provider encounters an outage or rate limit (HTTP 429), the other provider completes and persists its leads normally.
+
+### Adding New Skill Keywords
+
+Skill evaluation is configured in `apps/services/lead_service/app/application/scoring.py`. To introduce a new technology or domain skill:
+
+```python
+from apps.services.lead_service.app.application.scoring import SkillDefinition
+
+# Add to DEFAULT_SKILL_PROFILES or create a custom SkillConfig:
+SkillDefinition(
+    canonical_name="Solana",
+    weight=20,
+    aliases=("solana", "sol", "anchor", "rust"),
+)
+```
+- **Boundary-Safe Matching**: Handles punctuation in technology names (`C++`, `C#`, `.NET`, `Node.js`) without substring collisions.
+- **Title Weight Multiplier**: Matches found in the job title receive a 2.0x weight bonus.
+- **Qualification Gating**: By default, leads scoring $\ge 40$ are categorized as `QUALIFIED`.
+
+### Running Verification Tests
+
+```bash
+# Run all unit tests
+uv run pytest tests/unit/
+
+# Run live and resilience integration tests
+uv run pytest tests/integration/
+
+# Generate test coverage report for lead_service (Acceptance: >= 80%)
+uv run pytest --cov=apps/services/lead_service/app tests/
+```
+
 ## For AI Coding Assistants
 
 Before changing code: read `AGENTS.md`, check the current ticket, preserve existing architecture/naming, don't silently swap tech choices or implement future-day scope, explain architectural changes before making them broad.
+
