@@ -211,8 +211,9 @@ For infra changes: verify actual runtime behavior, not just config syntax.
   - [x] **TICKET-03**: Skill-matching scoring + persistence layer (keyword-based score 0–100, configurable threshold, `Lead` DB model, Alembic migration 004, `LeadRepository`)
   - [x] **TICKET-04**: Celery orchestration (`discover_leads` task, idempotency, partial-failure isolation, Celery Beat schedule, manual trigger endpoint)
   - [x] **TICKET-05**: Integration testing + polish (live API integration, 429 rate-limit resilience, 88% test coverage, comprehensive README documentation)
+  - [x] **Swagger API Verification**: Live interactive Swagger verification completed with JWT bearer token, background Celery worker processing, and PostgreSQL persistence.
 
-**Next**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant, RAG).
+**Next**: Day 6 — Integrate Arbeitnow Free Job Board API (`lead_service`) as the 3rd discovery provider before Phase 2 Agentic AI.
 
 
 

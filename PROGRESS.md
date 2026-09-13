@@ -7,10 +7,10 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Phase**: Phase 1: Discovery & Lead Pipeline (`lead_service`) — **COMPLETED**
-- **Current Ticket**: TICKET-05 — Integration testing + polish (Completed)
+- **Current Phase**: Phase 1 Discovery Pipeline Extension (`lead_service`) — **Day 6: Arbeitnow API Integration**
+- **Current Ticket**: DAY-06: Integrate Arbeitnow Free Job Board API
 - **Next Phase**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant)
-- **Status**: Phase 1 fully verified with live APIs, resilience testing, 88% test coverage (96/96 passing)
+- **Status**: Live Swagger testing verified (21 real leads persisted, 96/96 tests passing). Day 6 implementation plan ready.
 
 ---
 
@@ -172,6 +172,17 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
   - Celery Beat schedule and manual trigger endpoint (`POST /discovery/run`).
 - [x] **TICKET-05: Integration testing + polish** *(Completed)*
   - End-to-end pipeline verification against live APIs, structured logging review, 88% test coverage, and documentation.
+
+### Day 6: Arbeitnow API Integration (`lead_service`) — Ready to Start
+Scope: Third live discovery provider integration alongside Hacker News and Remotive. 100% free unauthenticated job board (250+ live tech/remote jobs per call).
+- Branch: `feat/lf-06-arbeitnow-integration`
+- Implementation Plan: `implementation_plan.md`
+- Tasks:
+  - [ ] **Step 1**: Add `ARBEITNOW = "arbeitnow"` to `LeadSource` enum & Pydantic response models (`ArbeitnowJobItem`, `ArbeitnowResponse` in `schemas.py`).
+  - [ ] **Step 2**: Build `ArbeitnowClient` with `httpx`, `tenacity` retries, and typed domain exceptions (`RateLimitExceededError`, `UpstreamServiceError`, `DiscoveryTimeoutError`).
+  - [ ] **Step 3**: Implement `ArbeitnowMapper` converting `ArbeitnowJobItem` to canonical `RawLead` (HTML stripping, legal suffix normalization, date parsing).
+  - [ ] **Step 4**: Wire Arbeitnow into `DiscoveryPipelineService` (`asyncio.gather`), Celery background task, and FastAPI routes with Bulkhead isolation.
+  - [ ] **Step 5**: Unit tests with `respx` mocks, full test suite run, and live verification via Swagger UI.
 
 ---
 
