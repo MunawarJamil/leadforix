@@ -7,10 +7,18 @@ Any AI model or developer starting a new chat session should read this file firs
 
 ## 1. Current Phase & Ticket
 
-- **Current Phase**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant)
-- **Current Ticket**: DAY-07: Phase 2 Kickoff — Agent Service Architecture & LangGraph Foundation
-- **Next Phase**: Phase 3 — Agency Expansion (multi-tenancy, multi-seat, client campaigns)
-- **Status**: Day 6 Arbeitnow Free Job Board Integration complete (109/109 tests passing, 86% coverage). Phase 1 Discovery Pipeline fully completed with 3 concurrent live providers (Hacker News, Remotive, Arbeitnow).
+- **Current Phase**: V1 Job Seeker Fullstack SaaS Platform (MVP)
+- **Current Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile
+- **Day 07 Status**: Day 07 (LangGraph Agent Foundation) is formally **PAUSED** to build the complete working fullstack platform for job seekers first.
+- **Immediate Task on Resume**: Discuss and implement Item 1 of TICKET-07: *Tenancy & Workspace Provisioning (Auto-Create on Signup)*.
+- **Subsequent V1 Roadmap**:
+  - `TICKET-07`: Auth & Workspace Integration + User Job Profile
+  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
+  - `TICKET-09`: Scikit-learn Deduplication & Ranked Match Search API
+  - `TICKET-10`: 2-Hour Cron Ingestion & Instant High-Match Email Alerts
+  - `TICKET-11`: Modern Fullstack Frontend (Landing, Auth, Feed & Resume UI)
+  - `TICKET-12`: Fullstack E2E Testing, Docker Integration & Polish
+  - `Phase 2 (Later)`: LangGraph Autonomous Outreach & Agency Expansion
 
 ---
 
@@ -181,6 +189,18 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
   - [x] **Step 3**: Implemented `ArbeitnowMapper` converting `ArbeitnowJobItem` to canonical `RawLead` (HTML stripping, location fallback, epoch timestamp parsing).
   - [x] **Step 4**: Wired Arbeitnow into `DiscoveryPipelineService` (`asyncio.gather`), Celery background task (`discover_leads_task`), and FastAPI routes with Bulkhead isolation.
   - [x] **Step 5**: Unit test suite in `tests/unit/test_arbeitnow.py` with `respx` mocks, 100% test pass rate across all suites (109/109 passed), and 86% code coverage.
+
+---
+
+## 5.1 TICKET-07 Feature Breakdown & Handover State
+
+Paused Day 07 (LangGraph) in favor of completing V1 Fullstack MVP for individual job seekers.
+TICKET-07 covers:
+1. **Tenancy & Workspace Provisioning (Auto-Create on Signup)**: Connect `auth_service` registration with `workspace_service` to auto-provision personal workspaces. *(Next topic to discuss upon resuming)*
+2. **Workspace & Membership Schema**: `workspaces` and `workspace_members` in `workspace_service`.
+3. **Job Seeker Profile Schema (`user_job_profiles`)**: Target titles, primary skills, target locations, experience level, min rate/salary, status.
+4. **REST APIs (`workspace_service`)**: `/profile/me`, `/workspaces/me`, profile update endpoints.
+5. **Stateless Auth Integration**: Wire `shared/security` into `workspace_service` and run Alembic migrations.
 
 ---
 
