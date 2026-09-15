@@ -213,7 +213,10 @@ For infra changes: verify actual runtime behavior, not just config syntax.
   - [x] **TICKET-05**: Integration testing + polish (live API integration, 429 rate-limit resilience, 88% test coverage, comprehensive README documentation, live Swagger verification)
   - [x] **DAY-06**: Arbeitnow Free Job Board API integration (`ArbeitnowClient`, `ArbeitnowMapper`, multi-source Bulkhead isolation, 13 new unit tests, 109/109 tests passing).
 
-**Next**: Phase 2 — Agentic AI & RAG Layer (`agent_service`, LangGraph, LangChain, Qdrant).
+**Current Priority (V1 Fullstack MVP)**: Paused Day 07 (LangGraph) to complete working fullstack platform for job seekers first.
+- **Current Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile (Starting with Item 1: Tenancy & Workspace Provisioning on Signup).
+- **Subsequent V1 Roadmap**: TICKET-08 (Resume Upload & Parsing), TICKET-09 (Scikit-learn Dedup & Matched Search API), TICKET-10 (2-Hour Cron Ingestion & Instant Alerts), TICKET-11 (Fullstack Frontend UI), TICKET-12 (E2E Testing & Docker Polish).
+- **Phase 2 (Later)**: Resume LangGraph Autonomous Outreach & Agency Expansion.
 
 
 
