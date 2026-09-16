@@ -24,6 +24,7 @@ class User:
     created_at: datetime
     updated_at: datetime
     status: UserStatus = UserStatus.ACTIVE
+    default_workspace_id: UUID | None = None
 
 
 @dataclass(frozen=True)

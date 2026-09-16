@@ -2,6 +2,10 @@ import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+import logging
+from shared.messaging.rabbitmq import publish_event
+
+logger = logging.getLogger(__name__)
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,7 +75,28 @@ class AuthService:
             created_at=now,
             updated_at=now,
         )
-        return await self._repo.create_user(user)
+
+        created_user = await self._repo.create_user(user)
+
+        # Asynchronous Decoupled Event: RabbitMQ par event publish karein
+        try:
+            await publish_event(
+                routing_key="user.registered",
+                payload={
+                    "event": "user.registered",
+                    "user_id": str(created_user.id),
+                    "email": created_user.email,
+                    "tenant_type": "JOB_SEEKER",
+                },
+            )
+            logger.info("Published user.registered event for user %s", created_user.id)
+        except Exception as exc:
+            # Fault Tolerance: Agar RabbitMQ temporarily unreachable ho, tab bhi user registration fail na ho
+            logger.warning("Failed to publish user.registered event: %s", exc)
+
+        return created_user
+
+        # return await self._repo.create_user(user)
 
     async def authenticate_user(
         self,

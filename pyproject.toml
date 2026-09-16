@@ -5,6 +5,7 @@ description = "Leadforix AI Sales Platform"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "aio-pika>=9.5.0",
     "alembic>=1.19.1",
     "asyncpg>=0.31.0",
     "bcrypt>=4.0.0",

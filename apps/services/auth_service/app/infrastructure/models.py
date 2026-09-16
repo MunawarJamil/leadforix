@@ -50,6 +50,15 @@ class UserModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         nullable=False,
     )
 
+    # Workspace relationship
+    default_workspace_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id", ondelete="SET NULL"),
+        index=True,
+        nullable=True,
+    )
+
+
     # 1-to-Many relationship with cascade deletion: Deleting a user purges all active refresh tokens
     # Uses lazy="raise" in async contexts to guarantee zero extraneous I/O during user lookups
     refresh_tokens: Mapped[list["RefreshTokenModel"]] = relationship(
@@ -71,12 +80,13 @@ class UserModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
             UserStatus(self.status) if hasattr(UserStatus, self.status) else UserStatus.ACTIVE
         )
         return User(
-            id=self.id,
+             id=self.id,
             email=self.email,
             hashed_password=self.hashed_password,
             role=UserRole(self.role),
-            is_active=self.is_active and (user_status == UserStatus.ACTIVE),
             status=user_status,
+            is_active=self.is_active,
+            default_workspace_id=self.default_workspace_id,  # <-- Add this
             created_at=self.created_at,
             updated_at=self.updated_at,
         )
