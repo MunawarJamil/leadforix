@@ -8,12 +8,13 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: V1 Job Seeker Fullstack SaaS Platform (MVP)
-- **Current Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile
+- **Current Ticket**: TICKET-08: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
+- **Previous Completed Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile (100% Complete)
 - **Day 07 Status**: Day 07 (LangGraph Agent Foundation) is formally **PAUSED** to build the complete working fullstack platform for job seekers first.
-- **Immediate Task on Resume**: Discuss and implement Item 1 of TICKET-07: *Tenancy & Workspace Provisioning (Auto-Create on Signup)*.
+- **Immediate Task on Resume**: Discuss and implement Step 1 of TICKET-08 (*Resume Upload & Parsing Engine: file upload endpoint, secure validation, and text extraction*).
 - **Subsequent V1 Roadmap**:
-  - `TICKET-07`: Auth & Workspace Integration + User Job Profile
-  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
+  - `TICKET-07`: Auth & Workspace Integration + User Job Profile [COMPLETED]
+  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction) [CURRENT]
   - `TICKET-09`: Scikit-learn Deduplication & Ranked Match Search API
   - `TICKET-10`: 2-Hour Cron Ingestion & Instant High-Match Email Alerts
   - `TICKET-11`: Modern Fullstack Frontend (Landing, Auth, Feed & Resume UI)
@@ -200,10 +201,10 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
 Paused Day 07 (LangGraph) in favor of completing V1 Fullstack MVP for individual job seekers.
 TICKET-07 covers:
 - [x] **1. Tenancy & Workspace Provisioning (Auto-Create on Signup via RabbitMQ)**: Asynchronously decoupled `auth_service` registration from `workspace_service` via RabbitMQ (`aio-pika`, durable exchange `leadforix.events`, queue `workspace.user_registered.queue`, consumer worker with lifespan management, fault tolerance).
-- [x] **2. Workspace & Membership Schema**: Multi-tenant domain models (`Workspace`, `WorkspaceMember`, `WorkspaceRole`, `TenantType`), SQLAlchemy models (`workspaces`, `workspace_members`), Alembic revision `005_workspace_tables` applied, `users.default_workspace_id` column added. 114/114 tests passing.
-- [ ] **3. Job Seeker Profile Schema (`user_job_profiles`)**: Target titles, primary skills, target locations, experience level, min rate/salary, status.
-- [ ] **4. REST APIs (`workspace_service`)**: `/profile/me`, `/workspaces/me`, profile update endpoints.
-- [ ] **5. Stateless Auth Integration**: Wire `shared/security` into `workspace_service` and run Alembic migrations.
+- [x] **2. Workspace & Membership Schema**: Multi-tenant domain models (`Workspace`, `WorkspaceMember`, `WorkspaceRole`, `TenantType`), SQLAlchemy models (`workspaces`, `workspace_members`), Alembic revision `005_workspace_tables` applied, `users.default_workspace_id` column added.
+- [x] **3. Job Seeker Profile Schema (`user_job_profiles`)**: Target titles, primary skills, target locations, experience level, min rate/salary, status, MutableList JSONB change tracking, Alembic revision `006_job_profiles` applied.
+- [x] **4. REST APIs (`workspace_service`)**: Implemented `/profile/me`, `/workspaces/me`, and `PUT /profile/me` endpoints with Pydantic DTOs and clean exception mapping.
+- [x] **5. Stateless Auth Integration & Verification**: Wired `shared/security` JWT Bearer token authentication into `workspace_service`, registered shared exception handlers, and achieved 100% test pass rate across all suites.
 
 ---
 

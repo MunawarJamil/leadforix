@@ -11,12 +11,17 @@ from datetime import datetime, timezone
 import uuid
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from apps.services.workspace_service.app.domain.models import Workspace, WorkspaceMember
+from apps.services.workspace_service.app.domain.models import Workspace, ExperienceLevel,JobSearchStatus, UserJobProfile,WorkspaceMember
 from apps.services.workspace_service.app.domain.roles import TenantType, WorkspaceRole
 from shared.database.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
+from sqlalchemy.ext.mutable import MutableList  
+ 
+ 
+ 
 
 
 class WorkspaceModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -142,4 +147,98 @@ class WorkspaceMemberModel(Base, UUIDPrimaryKeyMixin):
             user_id=domain.user_id,
             role=domain.role.value,
             joined_at=domain.joined_at,
+        )
+
+
+# Model for Jobseeker user profile in workspace
+class UserJobProfileModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    """
+    SQLAlchemy ORM Model representing the 'user_job_profiles' database table.
+    Stores job targeting and skill parameters powering the lead discovery scoring engine.
+    """
+
+    __tablename__ = "user_job_profiles"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+
+    # Dynamic criteria stored efficiently in JSONB
+    # FIX: Wrapped in MutableList.as_mutable and changed default to a lambda factory
+    target_titles: Mapped[list[str]] = mapped_column(
+        MutableList.as_mutable(JSONB),
+        nullable=False,
+        default=lambda: [],
+    )
+    primary_skills: Mapped[list[str]] = mapped_column(
+        MutableList.as_mutable(JSONB),
+        nullable=False,
+        default=lambda: [],
+    )
+    target_locations: Mapped[list[str]] = mapped_column(
+        MutableList.as_mutable(JSONB),
+        nullable=False,
+        default=lambda: [],
+    )
+
+    is_remote_only: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+    experience_level: Mapped[str] = mapped_column(
+        String(30),
+        default=ExperienceLevel.MID.value,
+        nullable=False,
+    )
+    min_salary_usd: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    search_status: Mapped[str] = mapped_column(
+        String(30),
+        default=JobSearchStatus.ACTIVELY_LOOKING.value,
+        nullable=False,
+    )
+
+    def to_domain(self) -> UserJobProfile:
+        return UserJobProfile(
+            id=self.id,
+            user_id=self.user_id,
+            workspace_id=self.workspace_id,
+            target_titles=list(self.target_titles or []),
+            primary_skills=list(self.primary_skills or []),
+            target_locations=list(self.target_locations or []),
+            is_remote_only=self.is_remote_only,
+            experience_level=ExperienceLevel(self.experience_level),
+            min_salary_usd=self.min_salary_usd,
+            search_status=JobSearchStatus(self.search_status),
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+
+    @classmethod
+    def from_domain(cls, domain: UserJobProfile) -> "UserJobProfileModel":
+        return cls(
+            id=domain.id,
+            user_id=domain.user_id,
+            workspace_id=domain.workspace_id,
+            target_titles=domain.target_titles,
+            primary_skills=domain.primary_skills,
+            target_locations=domain.target_locations,
+            is_remote_only=domain.is_remote_only,
+            experience_level=domain.experience_level.value,
+            min_salary_usd=domain.min_salary_usd,
+            search_status=domain.search_status.value,
+            created_at=domain.created_at,
+            updated_at=domain.updated_at,
         )

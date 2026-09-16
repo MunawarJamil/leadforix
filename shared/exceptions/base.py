@@ -135,3 +135,16 @@ class ConflictError(LeadforixError):
             status_code=409,
             details=details,
         )
+
+
+class NotFoundError(LeadforixError):
+    """Raised when a requested resource is not found."""
+
+    def __init__(
+        self,
+        message: str = "Resource not found",
+        code: str = "NOT_FOUND",
+        status_code: int = 404,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, code=code, status_code=status_code, details=details)
