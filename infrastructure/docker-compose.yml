@@ -8,6 +8,7 @@ volumes:
   postgres_data:
   redis_data:
   qdrant_data:
+  rabbitmq_data:
 
 x-service-base: &service-base
   profiles:
@@ -25,6 +26,7 @@ x-service-base: &service-base
     CELERY_BROKER_URL: redis://redis:6379/0
     CELERY_RESULT_BACKEND: redis://redis:6379/0
     QDRANT_URL: http://qdrant:6333
+    RABBITMQ_URL: amqp://${RABBITMQ_USER:-leadforix}:${RABBITMQ_PASSWORD:-leadforix}@rabbitmq:5672/
   depends_on:
     postgres:
       condition: service_healthy
@@ -106,6 +108,27 @@ services:
     container_name: leadforix-celery-beat
     command: ["celery", "-A", "infrastructure.messaging.celery_app.celery_app", "beat", "--loglevel=info"]
 
+
+
+  # ---------------- Message Broker ----------------
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: leadforix-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-leadforix}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-leadforix}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - leadforix-network
 
 
 

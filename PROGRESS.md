@@ -139,6 +139,9 @@ Any AI model or developer starting a new chat session should read this file firs
 9. **Stateless Inter-Service Authentication**: Downstream services verify JWTs statelessly via `shared.security` without querying `auth_service` database or making network roundtrips.
 10. **Host Database Port (5433)**: Docker Postgres is mapped to host port `5433:5432` to avoid collision with any local native PostgreSQL installations.
 11. **Docker Compose Profiles & Selective Running**: Services inherit `profiles: ["full"]`. Core infra (`postgres`, `redis`, `traefik`) runs by default; individual services can be started on-demand (`docker compose up -d traefik <service>`), or everything with `--profile full`.
+12. **Inter-Service Communication Trade-Offs (HTTP vs. RabbitMQ)**:
+    - **Synchronous REST (HTTP)**: User Login / Authentication (Frontend to `auth_service`), and synchronous read queries (service-to-service data fetching where caller needs instant response).
+    - **Asynchronous Message Broker (RabbitMQ / Queue)**: Decoupled background side-effects such as Workspace Provisioning on signup (`auth_service` ➡️ RabbitMQ ➡️ `workspace_service`), notifications, and async data synchronization.
 
 ---
 
@@ -196,11 +199,11 @@ Scope: Lean, production-grade discovery ingestion pipeline using Algolia HN Sear
 
 Paused Day 07 (LangGraph) in favor of completing V1 Fullstack MVP for individual job seekers.
 TICKET-07 covers:
-1. **Tenancy & Workspace Provisioning (Auto-Create on Signup)**: Connect `auth_service` registration with `workspace_service` to auto-provision personal workspaces. *(Next topic to discuss upon resuming)*
-2. **Workspace & Membership Schema**: `workspaces` and `workspace_members` in `workspace_service`.
-3. **Job Seeker Profile Schema (`user_job_profiles`)**: Target titles, primary skills, target locations, experience level, min rate/salary, status.
-4. **REST APIs (`workspace_service`)**: `/profile/me`, `/workspaces/me`, profile update endpoints.
-5. **Stateless Auth Integration**: Wire `shared/security` into `workspace_service` and run Alembic migrations.
+- [x] **1. Tenancy & Workspace Provisioning (Auto-Create on Signup via RabbitMQ)**: Asynchronously decoupled `auth_service` registration from `workspace_service` via RabbitMQ (`aio-pika`, durable exchange `leadforix.events`, queue `workspace.user_registered.queue`, consumer worker with lifespan management, fault tolerance).
+- [x] **2. Workspace & Membership Schema**: Multi-tenant domain models (`Workspace`, `WorkspaceMember`, `WorkspaceRole`, `TenantType`), SQLAlchemy models (`workspaces`, `workspace_members`), Alembic revision `005_workspace_tables` applied, `users.default_workspace_id` column added. 114/114 tests passing.
+- [ ] **3. Job Seeker Profile Schema (`user_job_profiles`)**: Target titles, primary skills, target locations, experience level, min rate/salary, status.
+- [ ] **4. REST APIs (`workspace_service`)**: `/profile/me`, `/workspaces/me`, profile update endpoints.
+- [ ] **5. Stateless Auth Integration**: Wire `shared/security` into `workspace_service` and run Alembic migrations.
 
 ---
 

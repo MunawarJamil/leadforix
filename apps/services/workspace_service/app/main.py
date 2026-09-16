@@ -1,7 +1,26 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="Leadforix workspace service")
 
+import asyncio
+
+from contextlib import asynccontextmanager
+from apps.services.workspace_service.app.infrastructure.consumer import run_workspace_consumer
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start background consumer worker for RabbitMQ messages
+    consumer_task = asyncio.create_task(run_workspace_consumer())
+    yield
+    # Shutdown: Clean cancellation
+    consumer_task.cancel()
+    try:
+        await consumer_task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(title="Leadforix workspace service")
 
 @app.get("/")
 def root():
