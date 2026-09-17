@@ -8,16 +8,17 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: V1 Job Seeker Fullstack SaaS Platform (MVP)
-- **Current Ticket**: TICKET-08: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
+- **Current Ticket**: Frontend Foundation & Setup (`apps/frontend`)
 - **Previous Completed Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile (100% Complete)
-- **Day 07 Status**: Day 07 (LangGraph Agent Foundation) is formally **PAUSED** to build the complete working fullstack platform for job seekers first.
-- **Immediate Task on Resume**: Discuss and implement Step 1 of TICKET-08 (*Resume Upload & Parsing Engine: file upload endpoint, secure validation, and text extraction*).
+- **Immediate Task**: Initialize React + Vite + TypeScript in `apps/frontend`, configure TailwindCSS, TanStack Router, TanStack Query, and API Client.
+- **Frontend Stack**: React 19, Vite, TanStack Router, TanStack Query, TailwindCSS.
 - **Subsequent V1 Roadmap**:
   - `TICKET-07`: Auth & Workspace Integration + User Job Profile [COMPLETED]
-  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction) [CURRENT]
+  - `Frontend Foundation`: React + Vite + TanStack Router + Query + Tailwind [CURRENT]
+  - `Frontend Pages`: Auth (Login/Register), Dashboard, Job Seeker Profile UI, Lead Discovery Feed
+  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
   - `TICKET-09`: Scikit-learn Deduplication & Ranked Match Search API
   - `TICKET-10`: 2-Hour Cron Ingestion & Instant High-Match Email Alerts
-  - `TICKET-11`: Modern Fullstack Frontend (Landing, Auth, Feed & Resume UI)
   - `TICKET-12`: Fullstack E2E Testing, Docker Integration & Polish
   - `Phase 2 (Later)`: LangGraph Autonomous Outreach & Agency Expansion
 

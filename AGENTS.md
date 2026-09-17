@@ -11,7 +11,8 @@ Leadforix is an AI-powered client acquisition and SDR platform designed for **fr
 2. **Phase 2 (Agentic AI & RAG Layer)**: Implement stateful multi-step agent workflows (LangGraph, LangChain, RAG, Qdrant, LangSmith) tested against real leads rather than synthetic mocks.
 3. **Phase 3 (Agency Expansion)**: Scale the platform to multi-tenant tech agencies with multi-seat workspaces, team collaboration, and client campaigns.
 
-**Stack**: FastAPI, PostgreSQL, Qdrant, Redis, Celery, LangChain, LangGraph, RAG, LangSmith, Docker, Traefik.
+**Backend Stack**: FastAPI, PostgreSQL, Qdrant, Redis, RabbitMQ, Celery, LangChain, LangGraph, RAG, LangSmith, Docker, Traefik.
+**Frontend Stack**: React 19, Vite, TanStack Router, TanStack Query, TailwindCSS (Pure SPA in `apps/frontend`).
 
 ## 1. Golden Rule
 
