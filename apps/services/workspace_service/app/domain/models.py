@@ -3,6 +3,12 @@ from datetime import datetime
 from uuid import UUID
 
 from apps.services.workspace_service.app.domain.roles import TenantType, WorkspaceRole
+from apps.services.workspace_service.app.domain.roles import (
+    ExperienceLevel,
+    JobSearchStatus,
+    TenantType,
+    WorkspaceRole,
+)
 
 
 @dataclass(frozen=True)
@@ -40,3 +46,28 @@ class WorkspaceMember:
     user_id: UUID
     role: WorkspaceRole
     joined_at: datetime
+
+
+
+@dataclass(frozen=True)
+class UserJobProfile:
+    """
+    Domain Entity representing a Job Seeker / Freelancer matching profile.
+
+    Design Patterns & Principles:
+    - Encapsulation: Stores preferences for the Discovery scoring engine.
+    - Immutability Pattern (frozen=True): Prevents partial/untracked state changes.
+    """
+
+    id: UUID
+    user_id: UUID
+    workspace_id: UUID
+    target_titles: list[str]
+    primary_skills: list[str]
+    target_locations: list[str]
+    is_remote_only: bool
+    experience_level: ExperienceLevel
+    min_salary_usd: int | None
+    search_status: JobSearchStatus
+    created_at: datetime
+    updated_at: datetime

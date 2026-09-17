@@ -7,6 +7,7 @@ from shared.exceptions.base import (
     DuplicateEntityError,
     EntityNotFoundError,
     LeadforixError,
+    NotFoundError
 )
 from shared.exceptions.handlers import (
     ErrorDetail,
@@ -19,6 +20,7 @@ __all__ = [
     "DatabaseError",
     "DatabaseConnectionError",
     "EntityNotFoundError",
+    "NotFoundError",
     "DuplicateEntityError",
     "AuthenticationError",
     "AuthorizationError",

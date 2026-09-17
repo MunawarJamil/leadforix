@@ -101,6 +101,7 @@ class UserModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
             role=user.role.value,
             status=user.status.value,
             is_active=user.is_active,
+            default_workspace_id=user.default_workspace_id,
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
