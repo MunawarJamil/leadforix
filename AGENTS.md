@@ -218,9 +218,12 @@ For infra changes: verify actual runtime behavior, not just config syntax.
   - [x] **TICKET-05**: Integration testing + polish (live API integration, 429 rate-limit resilience, 88% test coverage, comprehensive README documentation, live Swagger verification)
   - [x] **DAY-06**: Arbeitnow Free Job Board API integration (`ArbeitnowClient`, `ArbeitnowMapper`, multi-source Bulkhead isolation, 13 new unit tests, 109/109 tests passing).
 
-**Current Priority (V1 Fullstack MVP)**: Paused Day 07 (LangGraph) to complete working fullstack platform for job seekers first.
-- **Current Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile (Starting with Item 1: Tenancy & Workspace Provisioning on Signup).
-- **Subsequent V1 Roadmap**: TICKET-08 (Resume Upload & Parsing), TICKET-09 (Scikit-learn Dedup & Matched Search API), TICKET-10 (2-Hour Cron Ingestion & Instant Alerts), TICKET-11 (Fullstack Frontend UI), TICKET-12 (E2E Testing & Docker Polish).
+**Current Priority (V1 Fullstack MVP)**:
+- [x] **TICKET-07**: Auth & Workspace Integration + User Job Profile (Auto-provisioning via RabbitMQ, multi-tenant workspace schema, job profiles, and JWT authorization).
+- [x] **Frontend Foundation & Architecture (`apps/frontend`)**: React 19, Vite, TanStack Router, TanStack Query, Zustand (`useTenantStore`), TailwindCSS v3.4, CVA primitives, composed widgets, dynamic layout shell (`AppShell`), and resilient API client.
+- [x] **Frontend Pages (`features/workspace/` & `features/leads/`)**: Job Profile form with React Hook Form + Zod, interactive `SkillTagPicker`, `FilterToolbar`, `LeadCard`, `LeadDetailDrawer`, `LeadFeed`, and TanStack Router mounts under `/app/*`.
+- **Current Ticket**: TICKET-08 (Resume Upload & Parsing Engine — PDF/DOCX Extraction).
+- **Subsequent V1 Roadmap**: TICKET-09 (Scikit-learn Dedup & Matched Search API), TICKET-10 (2-Hour Cron Ingestion & Instant Alerts), TICKET-12 (Fullstack E2E Testing & Docker Polish).
 - **Phase 2 (Later)**: Resume LangGraph Autonomous Outreach & Agency Expansion.
 
 

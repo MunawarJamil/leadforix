@@ -8,15 +8,16 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: V1 Job Seeker Fullstack SaaS Platform (MVP)
-- **Current Ticket**: Frontend Foundation & Setup (`apps/frontend`)
-- **Previous Completed Ticket**: TICKET-07: Auth & Workspace Integration + User Job Profile (100% Complete)
-- **Immediate Task**: Initialize React + Vite + TypeScript in `apps/frontend`, configure TailwindCSS, TanStack Router, TanStack Query, and API Client.
-- **Frontend Stack**: React 19, Vite, TanStack Router, TanStack Query, TailwindCSS.
+- **Current Ticket**: TICKET-08: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
+- **Previous Completed Ticket**: Frontend Pages: Workspace & Profile UI, Lead Discovery Feed, and RHF Form Integration (100% Complete)
+- **Immediate Task**: Implement resume upload endpoint, text extraction service (pdfplumber/docx), and skill/profile auto-enrichment.
+- **Frontend Stack**: React 19, Vite, TanStack Router, TanStack Query, TailwindCSS v3.4, Zustand, React Hook Form, Zod.
 - **Subsequent V1 Roadmap**:
   - `TICKET-07`: Auth & Workspace Integration + User Job Profile [COMPLETED]
-  - `Frontend Foundation`: React + Vite + TanStack Router + Query + Tailwind [CURRENT]
-  - `Frontend Pages`: Auth (Login/Register), Dashboard, Job Seeker Profile UI, Lead Discovery Feed
-  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
+  - `Frontend Foundation`: React + Vite + TanStack Router + Query + Tailwind [COMPLETED]
+  - `Frontend Layout & Auth Slice`: CVA Primitives, Widgets, AppShell, Auth Slice [COMPLETED]
+  - `Frontend Pages`: Workspace & Profile UI, Lead Discovery Feed, RHF + Zod [COMPLETED]
+  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction) [CURRENT]
   - `TICKET-09`: Scikit-learn Deduplication & Ranked Match Search API
   - `TICKET-10`: 2-Hour Cron Ingestion & Instant High-Match Email Alerts
   - `TICKET-12`: Fullstack E2E Testing, Docker Integration & Polish
@@ -206,6 +207,41 @@ TICKET-07 covers:
 - [x] **3. Job Seeker Profile Schema (`user_job_profiles`)**: Target titles, primary skills, target locations, experience level, min rate/salary, status, MutableList JSONB change tracking, Alembic revision `006_job_profiles` applied.
 - [x] **4. REST APIs (`workspace_service`)**: Implemented `/profile/me`, `/workspaces/me`, and `PUT /profile/me` endpoints with Pydantic DTOs and clean exception mapping.
 - [x] **5. Stateless Auth Integration & Verification**: Wired `shared/security` JWT Bearer token authentication into `workspace_service`, registered shared exception handlers, and achieved 100% test pass rate across all suites.
+
+---
+
+## 5.2 Frontend Foundation & Architecture (`apps/frontend`) — Completed
+
+- **Tooling & Engine**: React 19.2.8, Vite 8.3.0, TypeScript 6.0, initialized cleanly via `pnpm`.
+- **Global State & Multi-Tenancy**: Zustand (`useTenantStore` in `src/lib/tenant/tenant-store.ts`) providing zero-provider state management for active tenant type (`JOB_SEEKER`, `FREELANCER`, `AGENCY`), workspace switching, and capability permissions (`can('team:manage')`).
+- **Styling & Design System**: TailwindCSS v3.4 + PostCSS, custom dark theme tokens (`#0A0A0B`, `#141416`, Indigo `#6366F1`), Inter/Geist fonts, status colors, and `cn(...)` utility (`clsx` + `tailwind-merge`).
+- **Core UI Primitives (`src/components/ui/`)**: Built using `class-variance-authority` (cva) following shadcn patterns (`Button`, `Input`, `Badge`, `Card`, `Chip`).
+- **Composed Cross-Feature Widgets (`src/components/widgets/`)**: `ScoreGauge` (0–100% color-graded gauge), `SourcePill` (HN, Remotive, Arbeitnow branding), `StatCard`, `StatusBadge`, `EmptyState`.
+- **Layout Shell (`src/components/layout/`)**: Dynamic `Sidebar`, `Topbar`, `MobileNav`, `AuthLayout`, and master responsive `AppShell`.
+- **Auth Feature Slice (`src/features/auth/`)**: `RoleSelector`, `LoginForm`, `RegisterForm`, `/login`, `/register`.
+- **Resilient API Client (`src/lib/api.ts`)**: In-memory token isolation (OWASP XSS defense), RFC 6819 401 token refresh queue, event-driven `onAuthFailure` listener, 15-second timeouts, Vite `/api` Traefik proxy.
+
+---
+
+## 5.3 Frontend Pages: Workspace Profile & Leads Discovery Feed — Completed
+
+- **Workspace Feature Slice (`src/features/workspace/`)**:
+  - `types/job-profile.ts`: Domain models for `JobProfile`, `ExperienceLevel`, `JobSearchStatus`, and `UpdateJobProfilePayload`.
+  - `schemas/job-profile-schema.ts`: Strict Zod schema enforcing target title/skill validation, experience level enums, and compensation floors.
+  - `components/skill-tag-picker.tsx`: Interactive compound chip picker with keyboard navigation (`Enter`, `,`, `Backspace`), click-to-dismiss badges, and quick-add suggestions.
+  - `components/job-profile-form.tsx`: Full RHF-driven profile form with experience level selector cards, compensation inputs, remote-only toggle, and unsaved change detection.
+- **Leads Feature Slice (`src/features/leads/`)**:
+  - `types/lead.ts`: Domain types for `Lead`, `LeadSource`, `LeadStatus`, and `LeadFilterState`.
+  - `components/filter-toolbar.tsx`: Interactive toolbar with instant text search, multi-source pills (`All`, `Hacker News`, `Remotive`, `Arbeitnow`), score threshold dropdown, remote-only toggle, and on-demand discovery CTA.
+  - `components/lead-card.tsx`: Lead card preview with `ScoreGauge`, `SourcePill`, matched skill chips, compensation badge, and click-to-view interaction.
+  - `components/lead-detail-drawer.tsx`: Slide-over backdrop drawer displaying complete unescaped job descriptions, match breakdown, and direct application / outreach links.
+  - `components/lead-feed.tsx`: Feed list orchestrating client-side filtering, active drawer selection, empty states, and realistic initial seed opportunities.
+- **TanStack Router Page Mounts (`src/routes/app/`)**:
+  - `src/routes/app.tsx`: Layout route wrapping child routes inside `<AppShell>`.
+  - `src/routes/app/profile.tsx`: Mounts `<JobProfileForm>` at `/app/profile`.
+  - `src/routes/app/leads.tsx`: Mounts `<LeadFeed>` at `/app/leads`.
+  - `src/routes/app/index.tsx`: Redirects `/app` directly to `/app/leads`.
+- **Build Status**: Verified via `tsc -b && vite build` (2218 modules transformed, 0 errors, 0 warnings).
 
 ---
 
