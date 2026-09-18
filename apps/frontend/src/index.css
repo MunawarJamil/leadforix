@@ -3,43 +3,212 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Makes native scrollbars, inputs and autofill render dark. */
+    color-scheme: dark;
+
+    /*
+     * Colors are stored as space-separated RGB channels, NOT hex.
+     * tailwind.config.js wraps them as rgb(var(--x) / <alpha-value>),
+     * which is what makes utilities like bg-accent/20 possible.
+     * Tokens are defined once here; the config only references them.
+     */
+
+    /* Surfaces */
+    --background: 10 10 11; /* #0A0A0B */
+    --surface: 20 20 22; /* #141416 */
+    --surface-hover: 28 28 31; /* #1C1C1F */
+    --border: rgb(255 255 255 / 0.08);
+    --border-strong: rgb(255 255 255 / 0.14);
+
+    /* Text */
+    --text-primary: 245 245 245; /* #F5F5F5 */
+    --text-secondary: 161 161 170; /* #A1A1AA */
+    --text-muted: 113 113 122; /* #71717A */
+
+    /* Brand */
+    --accent: 99 102 241; /* #6366F1 indigo: primary actions, links, active states */
+    --accent-hover: 124 127 242; /* #7C7FF2 */
+    --accent-alt: 167 139 250; /* #A78BFA violet: gradients only */
+
+    /* Status */
+    --success: 16 185 129; /* #10B981 */
+    --warning: 245 158 11; /* #F59E0B */
+    --error: 239 68 68; /* #EF4444 */
+    --info: 59 130 246; /* #3B82F6 */
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    background-color: var(--background);
-    color: var(--text-primary);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-background font-sans text-text-primary antialiased min-h-dvh;
     margin: 0;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headlines share one voice across landing page and app. text-balance avoids orphaned last words. */
+  h1,
+  h2,
+  h3 {
+    @apply font-display text-balance;
+  }
+
+  ::selection {
+    background: rgb(var(--accent) / 0.35);
+  }
+
+  /* Visible keyboard focus everywhere; mouse clicks don't trigger it. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+  }
+
+  /* Respect users who ask for less motion. Covers CSS animations and transitions globally. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
+@layer components {
+  /* Faint dot grid that fades out toward the edges. Hero background. */
+  .bg-dots {
+    background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 100%);
+  }
 
+  /* Soft fade on the left and right edges. Used on the tech-tag marquee. */
+  .mask-fade-x {
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
 
-:root {
-  /* Base surfaces */
-  --background: #0A0A0B;
-  --surface: #141416;
-  --surface-hover: #1C1C1F;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
+  /* Light sweep across a button on hover. Add to any button alongside `relative`. */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-shine:hover::after {
+    transform: translateX(120%);
+  }
 
-  /* Text */
-  --text-primary: #F5F5F5;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
+  /* Animated border sweep. Add `relative` + this class to any card.
+     The gradient orbits behind a masked ring so only the 1px edge is visible. */
+  .border-sweep {
+    position: relative;
+    isolation: isolate;
+    border-color: transparent !important;
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
 
-  /* Brand / Accent */
-  --accent: #6366F1;       /* Indigo — primary actions, links, active states */
-  --accent-hover: #7C7FF2;
-  --accent-muted: #6366F11A; /* 10% opacity, for subtle backgrounds/badges */
+  .border-sweep::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--border-angle),
+      transparent 0deg,
+      transparent 240deg,
+      rgb(var(--accent) / 0.9) 300deg,
+      rgb(var(--accent-alt) / 0.9) 330deg,
+      transparent 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+  }
 
-  /* Status colors */
-  --success: #10B981;
-  --success-muted: #10B9811A;
-  --warning: #F59E0B;
-  --warning-muted: #F59E0B1A;
-  --error: #EF4444;
-  --error-muted: #EF44441A;
-  --info: #3B82F6;
-  --info-muted: #3B82F61A;
+  /* Soft outer glow that follows the sweep. */
+  .border-sweep::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from var(--border-angle),
+      transparent 0deg,
+      transparent 240deg,
+      rgb(var(--accent) / 0.35) 300deg,
+      rgb(var(--accent-alt) / 0.35) 330deg,
+      transparent 360deg
+    );
+    filter: blur(10px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+  }
+
+  /* Hover: reveal the sweep and spin it. */
+  .border-sweep:hover::before,
+  .border-sweep:hover::after {
+    opacity: 1;
+    animation: border-spin 3s linear infinite;
+  }
+
+  /* Optional: idle drift so the sweep is always faintly moving. */
+  .border-sweep-idle::before,
+  .border-sweep-idle::after {
+    opacity: 0.6;
+    animation: border-spin 8s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .border-sweep:hover::before,
+    .border-sweep:hover::after,
+    .border-sweep-idle::before,
+    .border-sweep-idle::after {
+      animation: none;
+      opacity: 0.5;
+    }
+  }
+}
+
+/* Registered custom property — required so conic-gradient angles can animate smoothly. */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+@keyframes snake-move {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
 }
