@@ -4,7 +4,7 @@ import { SAMPLE_LEADS } from './data'
 
 export function LiveDemo() {
   return (
-    <Section className="py-10 sm:py-10 border-t border-border bg-surface/30">
+    <Section id="live-demo" className="py-10 sm:py-10 border-t border-border bg-surface/30">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-2xl mb-14">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-accent mb-3">

@@ -4,7 +4,7 @@ import { FAQ } from './data'
 
 export function Faq() {
   return (
-    <Section className="py-10 sm:py-15 border-t border-border">
+    <Section id="faq" className="py-10 sm:py-15 border-t border-border">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-12">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-accent mb-3">

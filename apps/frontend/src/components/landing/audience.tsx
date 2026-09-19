@@ -40,7 +40,7 @@ function AudienceCard({ icon, title, body, status }: AudienceCardProps) {
 
 export function Audience() {
   return (
-    <Section className="py-2 sm:py-20">
+    <Section id="audience" className="py-2 sm:py-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-2xl mb-14">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-accent mb-3">

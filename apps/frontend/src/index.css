@@ -40,12 +40,16 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
+    max-width: 100vw;
   }
 
   body {
     @apply bg-background font-sans text-text-primary antialiased min-h-dvh;
     margin: 0;
     text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    max-width: 100vw;
   }
 
   /* Headlines share one voice across landing page and app. text-balance avoids orphaned last words. */

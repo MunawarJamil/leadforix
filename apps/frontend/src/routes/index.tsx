@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Navbar } from '@/components/landing/navbar'
 import { Hero } from '@/components/landing/hero'
 import { TechMarquee } from '@/components/landing/tech-marquee'
 import { HowItWorks } from '@/components/landing/how-it-works'
@@ -14,15 +15,18 @@ export const Route = createFileRoute('/')({
 
 function HomeComponent() {
   return (
-    <main className="flex flex-1 flex-col">
-      <Hero />
-      <StatsStrip />
-      <TechMarquee />
-      <HowItWorks />
-      <LiveDemo />
-      <Audience />
-      <Faq />
-      <FinalCta />
-    </main>
+    <div className="relative min-h-screen flex flex-col bg-background text-text-primary selection:bg-accent/30 selection:text-white w-full max-w-full overflow-x-clip">
+      <Navbar />
+      <main className="flex flex-1 flex-col w-full max-w-full overflow-x-clip">
+        <Hero />
+        <StatsStrip />
+        <TechMarquee />
+        <HowItWorks />
+        <LiveDemo />
+        <Audience />
+        <Faq />
+        <FinalCta />
+      </main>
+    </div>
   )
 }

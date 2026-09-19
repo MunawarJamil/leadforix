@@ -222,9 +222,16 @@ For infra changes: verify actual runtime behavior, not just config syntax.
 - [x] **TICKET-07**: Auth & Workspace Integration + User Job Profile (Auto-provisioning via RabbitMQ, multi-tenant workspace schema, job profiles, and JWT authorization).
 - [x] **Frontend Foundation & Architecture (`apps/frontend`)**: React 19, Vite, TanStack Router, TanStack Query, Zustand (`useTenantStore`), TailwindCSS v3.4, CVA primitives, composed widgets, dynamic layout shell (`AppShell`), and resilient API client.
 - [x] **Frontend Pages (`features/workspace/` & `features/leads/`)**: Job Profile form with React Hook Form + Zod, interactive `SkillTagPicker`, `FilterToolbar`, `LeadCard`, `LeadDetailDrawer`, `LeadFeed`, and TanStack Router mounts under `/app/*`.
-- **Current Ticket**: TICKET-08 (Resume Upload & Parsing Engine — PDF/DOCX Extraction).
-- **Subsequent V1 Roadmap**: TICKET-09 (Scikit-learn Dedup & Matched Search API), TICKET-10 (2-Hour Cron Ingestion & Instant Alerts), TICKET-12 (Fullstack E2E Testing & Docker Polish).
+- [x] **Landing Page Visual Overhaul & Design System (`components/landing/` & `index.css`)**:
+  - Modular landing sections: `Hero`, `StatsStrip`, `TechMarquee`, `HowItWorks`, `LiveDemo`, `Audience`, `Faq`, `FinalCta`.
+  - Polymorphic `@radix-ui/react-slot` Button bugfix for single React element child constraint.
+  - Bespoke `SnakeBorder` SVG animation engine (`components/ui/snake-border.tsx`) with glowing gradient trails and Gaussian blur for Audience cards.
+  - Dedicated visual accents: Live signal beacons (`animate-ping`), top gradient accent beams, and ambient corner backlights for Live Demo & How It Works.
+  - High-fashion editorial typography system: `Playfair Display`, `Cormorant Garamond`, `Plus Jakarta Sans`, and `JetBrains Mono` with italic headline contrasts.
+- **Current Priority**: Enhance the design & typography of the remaining frontend pages (`/login`, `/register`, `/app/profile`, `/app/leads`) to match the new editorial landing aesthetic.
+- **Subsequent V1 Roadmap**: TICKET-08 (Resume Upload & Parsing Engine — PDF/DOCX Extraction), TICKET-09 (Scikit-learn Dedup & Matched Search API), TICKET-10 (2-Hour Cron Ingestion & Instant Alerts), TICKET-12 (Fullstack E2E Testing & Docker Polish).
 - **Phase 2 (Later)**: Resume LangGraph Autonomous Outreach & Agency Expansion.
+
 
 
 

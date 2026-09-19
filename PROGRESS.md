@@ -8,16 +8,18 @@ Any AI model or developer starting a new chat session should read this file firs
 ## 1. Current Phase & Ticket
 
 - **Current Phase**: V1 Job Seeker Fullstack SaaS Platform (MVP)
-- **Current Ticket**: TICKET-08: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
-- **Previous Completed Ticket**: Frontend Pages: Workspace & Profile UI, Lead Discovery Feed, and RHF Form Integration (100% Complete)
-- **Immediate Task**: Implement resume upload endpoint, text extraction service (pdfplumber/docx), and skill/profile auto-enrichment.
+- **Current Priority**: Frontend Pages Design Alignment (Enhancing `/login`, `/register`, `/app/profile`, `/app/leads` to match the editorial landing page aesthetic)
+- **Previous Completed Work**: Landing Page Visual Overhaul, Animations (SnakeBorder), and High-Fashion Typography System (100% Complete)
+- **Immediate Task**: Audit and enhance the design and typography of remaining frontend pages to match the new landing aesthetic.
 - **Frontend Stack**: React 19, Vite, TanStack Router, TanStack Query, TailwindCSS v3.4, Zustand, React Hook Form, Zod.
 - **Subsequent V1 Roadmap**:
   - `TICKET-07`: Auth & Workspace Integration + User Job Profile [COMPLETED]
   - `Frontend Foundation`: React + Vite + TanStack Router + Query + Tailwind [COMPLETED]
   - `Frontend Layout & Auth Slice`: CVA Primitives, Widgets, AppShell, Auth Slice [COMPLETED]
   - `Frontend Pages`: Workspace & Profile UI, Lead Discovery Feed, RHF + Zod [COMPLETED]
-  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction) [CURRENT]
+  - `Landing Page Overhaul`: Animations, SnakeBorder, Editorial Typography [COMPLETED]
+  - `Frontend Pages Design Alignment`: Match internal app pages to editorial aesthetic [CURRENT]
+  - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
   - `TICKET-09`: Scikit-learn Deduplication & Ranked Match Search API
   - `TICKET-10`: 2-Hour Cron Ingestion & Instant High-Match Email Alerts
   - `TICKET-12`: Fullstack E2E Testing, Docker Integration & Polish
@@ -242,6 +244,32 @@ TICKET-07 covers:
   - `src/routes/app/leads.tsx`: Mounts `<LeadFeed>` at `/app/leads`.
   - `src/routes/app/index.tsx`: Redirects `/app` directly to `/app/leads`.
 - **Build Status**: Verified via `tsc -b && vite build` (2218 modules transformed, 0 errors, 0 warnings).
+
+---
+
+## 5.4 Landing Page Visual Overhaul, Animations & Editorial Typography — Completed
+
+- **Landing Page Architecture (`src/components/landing/`)**:
+  - `Hero` (`hero.tsx`): Staggered entrance, shimmering gradient title with editorial italic contrast, floating preview card cluster with glow backlight.
+  - `StatsStrip` (`stats-strip.tsx`): Metric banner with dot dividers and monospace uppercase typography.
+  - `TechMarquee` (`tech-marquee.tsx`): Infinite marquee ticker of tech skills with gradient horizontal edge fades (`mask-fade-x`).
+  - `HowItWorks` (`how-it-works.tsx`): 3-step numbered journey with top gradient accent beams, illuminated badge numbers, and hover elevation.
+  - `LiveDemo` (`live-demo.tsx`): Real-time opportunity showcase with active radar signal beacons (`animate-ping`), top gradient accents, and score gauge counters.
+  - `Audience` (`audience.tsx`): Targeted cards for *Job seekers* and *Freelancers* equipped with custom glowing moving snake borders.
+  - `Faq` (`faq.tsx`): Accordion FAQ with smooth expand/collapse and plus rotation.
+  - `FinalCta` (`final-cta.tsx`): Radial-glow closing banner with quick profile registration triggers.
+- **Component Fixes & Stability**:
+  - `Button` (`src/components/ui/button.tsx`): Fixed Radix `Slot` error (`Slot failed to slot onto its children`) by branching `asChild ? children : (...)`, preventing null siblings from creating multi-child slot collisions.
+  - `index.css`: Fixed PostCSS/LightningCSS build error caused by `@keyframes` nested inside `:root`. Moved `@property --border-angle` and `@keyframes` to stylesheet root, and component utility classes to `@layer components`.
+- **Snake Border Animation Engine (`src/components/ui/snake-border.tsx`)**:
+  - Bespoke SVG overlay with normalized `pathLength="100"`, `strokeLinecap="round"`, and Gaussian blur filter (`feGaussianBlur`).
+  - Smooth, non-distorting infinite perimeter travel via `@keyframes snake-move` (`stroke-dashoffset: 0 -> -100`).
+  - Active exclusively on the *Job seekers* (emerald &rarr; blue) and *Freelancers* (indigo &rarr; violet) audience cards.
+- **High-Fashion Editorial Typography System**:
+  - Display / Serif: **`Playfair Display`** and **`Cormorant Garamond`** for headings with italic swash contrasts.
+  - Body Sans: **`Plus Jakarta Sans`** for crisp, geometric readability.
+  - Code / Monospace: **`JetBrains Mono`** for skill tags, match scores, and uppercase overlines (`— SECTION TITLE`).
+- **Build Status**: Verified via `tsc -b` and `vite build` (0 errors, 0 warnings).
 
 ---
 

@@ -22,7 +22,7 @@ export function Hero() {
   const prefersReduced = useReducedMotion()
 
   return (
-    <section className="relative isolate overflow-hidden">
+    <section id="top" className="relative isolate overflow-hidden">
       {/* Background: dot grid + drifting indigo glow */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-dots" aria-hidden />
       <div
@@ -34,15 +34,15 @@ export function Hero() {
         }}
       />
 
-      <div className="mx-auto max-w-6xl px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-16 pb-24 sm:pt-16 sm:pb-32 w-full min-w-0">
         <motion.div
           variants={prefersReduced ? undefined : container}
           initial={prefersReduced ? false : 'hidden'}
           animate={prefersReduced ? undefined : 'show'}
-          className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-10 items-center"
+          className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-10 items-center w-full min-w-0"
         >
           {/* Left: copy */}
-          <div className="flex flex-col items-start text-left">
+          <div className="flex flex-col items-start text-left w-full min-w-0">
             <motion.div variants={prefersReduced ? undefined : item}>
               <Badge
                 variant="accent"
@@ -56,7 +56,7 @@ export function Hero() {
 
             <motion.h1
               variants={prefersReduced ? undefined : item}
-              className="mt-6 text-display text-text-primary"
+              className="mt-6 text-display text-text-primary break-words"
             >
               {HERO.headlineLead}{' '}
               <span
@@ -76,12 +76,12 @@ export function Hero() {
 
             <motion.div
               variants={prefersReduced ? undefined : item}
-              className="mt-9 flex flex-wrap items-center gap-3"
+              className="mt-9 flex flex-wrap items-center gap-3 w-full"
             >
               <Button
                 asChild
                 size="lg"
-                className="btn-shine shadow-glow hover:shadow-glow-lg group"
+                className="btn-shine shadow-glow hover:shadow-glow-lg group w-full sm:w-auto justify-center"
               >
                 <Link to="/register">
                   {HERO.ctaPrimary}
@@ -89,7 +89,7 @@ export function Hero() {
                 </Link>
               </Button>
 
-              <Button asChild variant="secondary" size="lg" className="relative overflow-hidden">
+              <Button asChild variant="secondary" size="lg" className="relative overflow-hidden w-full sm:w-auto justify-center">
                 <Link to="/login">{HERO.ctaSecondary}</Link>
               </Button>
 
@@ -98,7 +98,7 @@ export function Hero() {
                 type="button"
                 disabled
                 aria-disabled="true"
-                className="group inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="group inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Upload className="w-4 h-4" />
                 <span>{HERO.ctaTertiary}</span>
@@ -110,7 +110,7 @@ export function Hero() {
           </div>
 
           {/* Right: floating preview cluster */}
-          <motion.div variants={prefersReduced ? undefined : item} className="relative">
+          <motion.div variants={prefersReduced ? undefined : item} className="relative w-full min-w-0">
             <PreviewCards />
           </motion.div>
         </motion.div>
