@@ -60,7 +60,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
       {/* Header: Company, Source Pill, Remote Beacon & Score Gauge + Detail Arrow */}
       <div className="flex items-start justify-between gap-3 sm:gap-4 mb-4 sm:mb-4.5">
         <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap min-w-0 flex-1">
-          <span className="font-bold text-text-primary text-sm sm:text-base tracking-tight font-sans">
+          <span className="font-bold text-accent text-sm sm:text-base tracking-tight font-sans">
             {lead.company_name}
           </span>
           <SourcePill source={lead.source} size="sm" />
@@ -76,8 +76,8 @@ export const LeadCard: React.FC<LeadCardProps> = ({
         <ScoreGauge score={lead.match_score} size="sm" showLabel={false} className="shrink-0" />
       </div>
 
-      {/* Role Title with Editorial High-Contrast Styling (Bluish by default, brightens on hover) */}
-      <h3 className="text-base sm:text-lg font-bold text-accent font-display tracking-tight group-hover:text-accent-hover transition-colors duration-200 line-clamp-2 leading-snug sm:leading-normal mb-3 sm:mb-3.5 break-words">
+      {/* Role Title with Editorial High-Contrast Styling (White title with serif display font) */}
+      <h3 className="text-base sm:text-lg font-bold text-text-primary font-display tracking-tight group-hover:text-white transition-colors duration-200 line-clamp-2 leading-snug sm:leading-normal mb-3 sm:mb-3.5 break-words">
         {lead.title}
       </h3>
 

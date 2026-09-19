@@ -247,13 +247,19 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
             )}
           </div>
         </div>
+
+        {/* Ambient Bottom Accent Glow Beam */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-70"
+        />
       </div>
 
       {/* 1. Target Roles & Seniority */}
       <Card className={cn(
-        "relative transition-all duration-300 overflow-hidden w-full min-w-0",
+        "group relative transition-all duration-300 overflow-hidden w-full min-w-0 shadow-xl shadow-black/20",
         isEditingRoles
-          ? "border-accent/60 bg-surface/95 shadow-xl shadow-accent/10 ring-1 ring-accent/30"
+          ? "border-accent/60 bg-surface/95 shadow-accent/10 ring-1 ring-accent/30"
           : "border-zinc-800/80 bg-surface/90 hover:border-zinc-700/80"
       )}>
         {/* Active Top Accent Glow Beam */}
@@ -369,9 +375,9 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
                   <Briefcase className="w-3.5 h-3.5 text-accent" />
                   <span>Seniority Level</span>
                 </label>
-                <div className="p-4 rounded-xl border border-accent/40 bg-accent/10 shadow-sm shadow-accent/10 max-w-xl flex items-center justify-between">
+                <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 shadow-sm shadow-emerald-500/5 max-w-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                       <CheckCircle2 className="w-4 h-4" />
                     </div>
                     <div>
@@ -437,18 +443,18 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
                             className={cn(
                               'relative flex flex-col items-center justify-center p-3.5 rounded-xl border text-center transition-all duration-200 cursor-pointer group',
                               isSelected
-                                ? 'border-accent bg-gradient-to-b from-accent/25 via-accent/10 to-zinc-950/90 text-white shadow-[0_0_16px_rgba(99,102,241,0.25)] ring-1 ring-accent/60 scale-[1.02]'
+                                ? 'border-emerald-500/80 bg-gradient-to-b from-emerald-500/20 via-emerald-500/10 to-zinc-950/90 text-white shadow-[0_0_16px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/50 scale-[1.02]'
                                 : 'border-zinc-800/80 bg-zinc-950/40 hover:bg-zinc-900/60 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200'
                             )}
                           >
                             {isSelected && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-accent absolute top-2 right-2 animate-ping" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-2 right-2 animate-ping" />
                             )}
                             <span className="text-xs font-bold tracking-tight">{level.label}</span>
                             <span className={cn(
                               "text-[10px] font-mono px-2 py-0.5 rounded-full mt-1.5 border transition-colors",
                               isSelected
-                                ? "bg-accent/20 border-accent/40 text-accent font-semibold"
+                                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-semibold"
                                 : "bg-black/50 border-white/5 text-zinc-500 group-hover:text-zinc-400"
                             )}>
                               {level.range}
@@ -494,13 +500,19 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
             </Button>
           </CardFooter>
         )}
+
+        {/* Ambient Bottom Accent Glow Beam */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+        />
       </Card>
 
       {/* 2. Core Technical Stack & Skills */}
       <Card className={cn(
-        "relative transition-all duration-300 overflow-hidden w-full min-w-0",
+        "group relative transition-all duration-300 overflow-hidden w-full min-w-0 shadow-xl shadow-black/20",
         isEditingSkills
-          ? "border-accent/60 bg-surface/95 shadow-xl shadow-accent/10 ring-1 ring-accent/30"
+          ? "border-accent/60 bg-surface/95 shadow-accent/10 ring-1 ring-accent/30"
           : "border-zinc-800/80 bg-surface/90 hover:border-zinc-700/80"
       )}>
         {/* Active Top Accent Glow Beam */}
@@ -586,7 +598,7 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-zinc-200 flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5 text-accent" />
+                    <Tag className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Core Skills & Technologies</span>
                   </label>
                   <span className="text-xs text-zinc-400 font-mono bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
@@ -599,7 +611,7 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
                     {currentPrimarySkills.map((skill) => (
                       <span
                         key={skill}
-                        className="inline-flex items-center px-3 py-1.5 rounded-lg border border-accent/40 bg-accent/10 text-accent text-xs font-semibold shadow-sm shadow-accent/5 transition-all"
+                        className="inline-flex items-center px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/30 text-emerald-400 font-mono text-xs font-medium shadow-sm shadow-emerald-500/5 transition-all"
                       >
                         {skill}
                       </span>
@@ -622,6 +634,7 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
                     description="Languages, frameworks, databases, and AI libraries you specialize in. Matches lead descriptions with your skill vector."
                     value={field.value}
                     onChange={field.onChange}
+                    chipVariant="emerald"
                     categorizedSuggestions={CATEGORIZED_SKILL_SUGGESTIONS}
                     suggestionsLabel="Curated High-Intent Tech Stacks:"
                     placeholder="Type a skill (e.g. Python, Docker, LangChain) and press Enter..."
@@ -661,13 +674,19 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
             </Button>
           </CardFooter>
         )}
+
+        {/* Ambient Bottom Accent Glow Beam */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+        />
       </Card>
 
       {/* 3. Compensation & Discovery Filters */}
       <Card className={cn(
-        "relative transition-all duration-300 overflow-hidden w-full min-w-0",
+        "group relative transition-all duration-300 overflow-hidden w-full min-w-0 shadow-xl shadow-black/20",
         isEditingSearch
-          ? "border-accent/60 bg-surface/95 shadow-xl shadow-accent/10 ring-1 ring-accent/30"
+          ? "border-accent/60 bg-surface/95 shadow-accent/10 ring-1 ring-accent/30"
           : "border-zinc-800/80 bg-surface/90 hover:border-zinc-700/80"
       )}>
         {/* Active Top Accent Glow Beam */}
@@ -756,9 +775,9 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
                   <Compass className="w-3.5 h-3.5 text-accent" />
                   <span>Current Job Search Status</span>
                 </label>
-                <div className="p-4 rounded-xl border border-accent/40 bg-accent/10 shadow-sm shadow-accent/10 max-w-xl flex items-center justify-between">
+                <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 shadow-sm shadow-emerald-500/5 max-w-xl flex items-center justify-between">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
                       <Compass className="w-4 h-4" />
                     </div>
                     <div>
@@ -1065,6 +1084,12 @@ export const JobProfileForm: React.FC<JobProfileFormProps> = ({
             </Button>
           </CardFooter>
         )}
+
+        {/* Ambient Bottom Accent Glow Beam */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+        />
       </Card>
     </form>
   )

@@ -78,7 +78,7 @@ export const LeadDetailDrawer: React.FC<LeadDetailDrawerProps> = ({
         <div className="p-6 border-b border-zinc-800/80 flex items-start justify-between gap-4 bg-surface/90 backdrop-blur-md sticky top-0 z-10">
           <div className="space-y-1.5 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs uppercase font-mono tracking-wider text-text-muted font-bold">
+              <span className="text-xs uppercase font-mono tracking-wider text-accent font-bold">
                 {lead.company_name}
               </span>
               <SourcePill source={lead.source} size="sm" />

@@ -301,13 +301,16 @@ TICKET-07 covers:
   - Replaced the workspace dropdown with the Leadforix brand identity: frosted gradient Sparkles icon tile mark and `Lead` + `Forix` wordmark wrapped in `<Link to="/app/leads">`.
   - Elevated Topbar stacking hierarchy to `sticky top-0 z-40` with `backdrop-blur-md`, ensuring it cleanly floats above scrolling feed content and toolbars.
 - **Matched Leads UI & Editorial Polish (`features/leads/`)**:
-  - **Job Title & Color Styling**: Set job titles to `text-accent group-hover:text-accent-hover` with `line-clamp-2 break-words`, ensuring titles wrap elegantly without truncation across mobile and desktop.
+  - **Company & Job Title Typography**: Styled company names in electric bluish accent (`text-accent`) matching the profile page eyebrow markers, while preserving high-contrast white serif typography (`text-text-primary group-hover:text-white font-display`) on role titles.
   - **Card Interactions & Visual Micro-Cues**: Added permanent ambient bottom accent glow beams (`opacity-70 group-hover:opacity-100`) and replaced boxy arrow tiles with a sleek hover micro-cue: `View Details →` (`font-mono text-xs text-accent opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0`).
   - **Source Badges & Score Gauge Consistency**: Standardized Hacker News, Remotive, and Arbeitnow source tags into unified dark luxury containers (`border-zinc-800 bg-zinc-900/80 text-zinc-300`). Enforced single-line match scores (`whitespace-nowrap`) and stripped redundant "High Intent" text labels.
   - **Ingestion Button Glow (`FilterToolbar`)**: Positioned `SnakeBorder` on `Fetch Fresh Leads` with `z-20 pointer-events-none`, a softened 1px hairline stroke, and subtle 60% opacity glow.
   - **Pagination Controls**: Introduced luxury numbered pagination bar rendering 5 leads per page, strictly conditioned to larger screens (`hidden sm:flex`).
   - **React 19 Purity**: Cleaned up synchronization `useEffect` and replaced impure render-time `Date.now()` with pure state snapshots (`useState(() => Date.now())`), eliminating cascading re-render warnings.
-- **Build Status**: Verified cleanly on Vite dev server and TypeScript type-checks.
+- **Profile Cards & Leads Cross-Page Harmony (`features/workspace/`)**:
+  - Embedded permanent bottom accent glow beams across all Profile section cards and the user banner.
+  - Aligned technical skill chips and status indicators with emerald green styling (`border-emerald-500/30 bg-emerald-950/30 text-emerald-400 font-mono`) matching the matched lead cards.
+- **Build Status**: Verified cleanly with `tsc -b && vite build` (2641 modules transformed, 0 errors, 0 warnings).
 
 ---
 
