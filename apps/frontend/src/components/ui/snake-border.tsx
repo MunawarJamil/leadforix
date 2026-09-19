@@ -13,6 +13,8 @@ export interface SnakeBorderProps {
   size?: number
   /** Border stroke width in pixels. Default: 1.5 */
   strokeWidth?: number
+  /** Corner radius in pixels. Default: 12 */
+  rx?: number | string
 }
 
 export function SnakeBorder({
@@ -22,6 +24,7 @@ export function SnakeBorder({
   duration = 8,
   size = 24,
   strokeWidth = 1.5,
+  rx = 12,
 }: SnakeBorderProps) {
   const id = React.useId().replace(/:/g, '')
 
@@ -54,7 +57,7 @@ export function SnakeBorder({
         y="0.75"
         width="calc(100% - 1.5px)"
         height="calc(100% - 1.5px)"
-        rx="12"
+        rx={rx}
         fill="none"
         stroke={`url(#snake-grad-${id})`}
         strokeWidth={strokeWidth}

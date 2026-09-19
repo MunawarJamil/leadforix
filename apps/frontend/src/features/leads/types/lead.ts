@@ -31,10 +31,15 @@ export interface Lead {
   discovered_at: string
 }
 
+export type WorkplaceFilter = 'ALL' | 'REMOTE' | 'HYBRID' | 'ONSITE'
+export type FreshnessFilter = 'ALL' | '24H' | '3D' | '1W' | '1M'
+
 export interface LeadFilterState {
   searchQuery: string
   source: 'ALL' | LeadSource
   minScore: number
   remoteOnly: boolean
+  workplaceType?: WorkplaceFilter
+  freshness?: FreshnessFilter
   status: 'ALL' | LeadStatus
 }

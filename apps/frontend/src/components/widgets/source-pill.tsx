@@ -19,25 +19,21 @@ export const SourcePill: React.FC<SourcePillProps> = ({ source, className, size 
         return {
           label: 'Hacker News',
           icon: Terminal,
-          styles: 'border-orange-500/30 bg-orange-500/10 text-orange-400',
         }
       case 'remotive':
         return {
           label: 'Remotive',
           icon: Zap,
-          styles: 'border-accent/30 bg-accent-muted text-accent',
         }
       case 'arbeitnow':
         return {
           label: 'Arbeitnow',
           icon: Globe,
-          styles: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400',
         }
       default:
         return {
           label: source,
           icon: Globe,
-          styles: 'border-border bg-surface text-text-secondary',
         }
     }
   }
@@ -48,13 +44,12 @@ export const SourcePill: React.FC<SourcePillProps> = ({ source, className, size 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border font-medium select-none',
-        config.styles,
+        'inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 font-medium select-none shrink-0',
         size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs',
         className
       )}
     >
-      <Icon className={size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
+      <Icon className={cn('text-text-muted', size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5')} />
       <span>{config.label}</span>
     </span>
   )

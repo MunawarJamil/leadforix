@@ -14,6 +14,7 @@ Any AI model or developer starting a new chat session should read this file firs
 - **Frontend Stack**: React 19, Vite, TanStack Router, TanStack Query, TailwindCSS v3.4, Zustand, React Hook Form, Zod.
 - [x] `Frontend Responsive Navbar & Layout Polish`: Eradicated mobile horizontal scrollbars with overflow-x-clip, tuned breakpoints, and added mobile drawer backdrop with scroll lock.
 - [x] `Profile Page View/Edit Overhaul`: User identity banner for Munawar Minhas, per-section Edit/Done toggles, and clean View Mode hiding all suggestion noise and unselected cards for Target Roles, Primary Skills, and Search & Availability.
+- [x] `Matched Leads Feed & AppShell Topbar Editorial Overhaul`: Brand identity logo mark in Topbar, responsive titles without truncation, consistent dark-luxury source pills, single-line score gauges, desktop pagination (5 leads/page), subtle SnakeBorder, and 'View Details →' hover reveal.
 - **Subsequent V1 Roadmap**:
   - `TICKET-07`: Auth & Workspace Integration + User Job Profile [COMPLETED]
   - `Frontend Foundation`: React + Vite + TanStack Router + Query + Tailwind [COMPLETED]
@@ -21,6 +22,7 @@ Any AI model or developer starting a new chat session should read this file firs
   - `Frontend Pages`: Workspace & Profile UI, Lead Discovery Feed, RHF + Zod [COMPLETED]
   - `Landing Page Overhaul`: Animations, SnakeBorder, Editorial Typography [COMPLETED]
   - `Profile Page Redesign & Interactive Sections`: Munawar Minhas profile, view vs edit modes [COMPLETED]
+  - `Matched Leads & Topbar Editorial Overhaul`: Branding, typography, pagination & interactions [COMPLETED]
   - `TICKET-08`: Resume Upload & Parsing Engine (PDF/DOCX Extraction)
   - `TICKET-09`: Scikit-learn Deduplication & Ranked Match Search API
   - `TICKET-10`: 2-Hour Cron Ingestion & Instant High-Match Email Alerts
@@ -290,6 +292,22 @@ TICKET-07 covers:
   - Paralleled status highlight cards (Seniority Level & Job Search Status) with `w-10 h-10` icon containers, pulse indicators (`animate-pulse`), and gradient backgrounds.
   - Responsive two-tier card headers eliminating button overlap or text collisions on mobile viewports (<400px).
 - **Build Status**: Fully verified with `vite build` (0 errors, dist build completed cleanly).
+
+---
+
+## 5.6 Matched Leads Feed & AppShell Topbar Editorial Overhaul — Completed
+
+- **AppShell Topbar Branding & Navigation**:
+  - Replaced the workspace dropdown with the Leadforix brand identity: frosted gradient Sparkles icon tile mark and `Lead` + `Forix` wordmark wrapped in `<Link to="/app/leads">`.
+  - Elevated Topbar stacking hierarchy to `sticky top-0 z-40` with `backdrop-blur-md`, ensuring it cleanly floats above scrolling feed content and toolbars.
+- **Matched Leads UI & Editorial Polish (`features/leads/`)**:
+  - **Job Title & Color Styling**: Set job titles to `text-accent group-hover:text-accent-hover` with `line-clamp-2 break-words`, ensuring titles wrap elegantly without truncation across mobile and desktop.
+  - **Card Interactions & Visual Micro-Cues**: Added permanent ambient bottom accent glow beams (`opacity-70 group-hover:opacity-100`) and replaced boxy arrow tiles with a sleek hover micro-cue: `View Details →` (`font-mono text-xs text-accent opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0`).
+  - **Source Badges & Score Gauge Consistency**: Standardized Hacker News, Remotive, and Arbeitnow source tags into unified dark luxury containers (`border-zinc-800 bg-zinc-900/80 text-zinc-300`). Enforced single-line match scores (`whitespace-nowrap`) and stripped redundant "High Intent" text labels.
+  - **Ingestion Button Glow (`FilterToolbar`)**: Positioned `SnakeBorder` on `Fetch Fresh Leads` with `z-20 pointer-events-none`, a softened 1px hairline stroke, and subtle 60% opacity glow.
+  - **Pagination Controls**: Introduced luxury numbered pagination bar rendering 5 leads per page, strictly conditioned to larger screens (`hidden sm:flex`).
+  - **React 19 Purity**: Cleaned up synchronization `useEffect` and replaced impure render-time `Date.now()` with pure state snapshots (`useState(() => Date.now())`), eliminating cascading re-render warnings.
+- **Build Status**: Verified cleanly on Vite dev server and TypeScript type-checks.
 
 ---
 

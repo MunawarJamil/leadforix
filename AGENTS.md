@@ -228,7 +228,17 @@ For infra changes: verify actual runtime behavior, not just config syntax.
   - Bespoke `SnakeBorder` SVG animation engine (`components/ui/snake-border.tsx`) with glowing gradient trails and Gaussian blur for Audience cards.
   - Dedicated visual accents: Live signal beacons (`animate-ping`), top gradient accent beams, and ambient corner backlights for Live Demo & How It Works.
   - High-fashion editorial typography system: `Playfair Display`, `Cormorant Garamond`, `Plus Jakarta Sans`, and `JetBrains Mono` with italic headline contrasts.
-- **Current Priority**: Enhance the design & typography of the remaining frontend pages (`/login`, `/register`, `/app/profile`, `/app/leads`) to match the new editorial landing aesthetic.
+- [x] **Matched Leads Feed & AppShell Topbar Editorial Overhaul (`features/leads/` & `components/layout/topbar.tsx`)**:
+  - Topbar Leadforix brand identity mark and wordmark linked to `/app/leads` at `z-40`.
+  - Permanent ambient bottom accent glow beam on lead cards (`opacity-70 group-hover:opacity-100`).
+  - Bluish job titles (`text-accent group-hover:text-accent-hover`) with multi-line wrapping (`line-clamp-2 break-words`).
+  - Unified dark luxury source pills across Hacker News, Remotive, and Arbeitnow.
+  - Single-line score gauges without redundant intent labels.
+  - Hover-revealed `View Details →` editorial micro-cue in lead card footer.
+  - Subtle hairline `SnakeBorder` on `Fetch Fresh Leads` button.
+  - Luxury numbered desktop pagination (5 leads per page).
+  - React 19 purity compliance (eliminated cascading `useEffect` setState and impure render-time `Date.now()`).
+- **Current Priority**: Enhance the design & typography of the remaining frontend auth pages (`/login`, `/register`) to match the new editorial landing aesthetic.
 - **Subsequent V1 Roadmap**: TICKET-08 (Resume Upload & Parsing Engine — PDF/DOCX Extraction), TICKET-09 (Scikit-learn Dedup & Matched Search API), TICKET-10 (2-Hour Cron Ingestion & Instant Alerts), TICKET-12 (Fullstack E2E Testing & Docker Polish).
 - **Phase 2 (Later)**: Resume LangGraph Autonomous Outreach & Agency Expansion.
 

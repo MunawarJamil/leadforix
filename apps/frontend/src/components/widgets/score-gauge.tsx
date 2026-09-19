@@ -11,7 +11,7 @@ export interface ScoreGaugeProps {
 export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   score,
   size = 'md',
-  showLabel = true,
+  showLabel = false,
   className,
 }) => {
   const normalizedScore = Math.max(0, Math.min(100, Math.round(score)))
@@ -31,28 +31,28 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
 
   const sizeStyles = {
     sm: {
-      badge: 'px-2 py-0.5 text-xs',
+      badge: 'px-1.5 py-0.5 text-[11px] font-medium whitespace-nowrap',
       barHeight: 'h-1',
-      width: 'w-16',
+      width: 'w-14 sm:w-16',
     },
     md: {
-      badge: 'px-2.5 py-1 text-xs font-semibold',
+      badge: 'px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
       barHeight: 'h-1.5',
       width: 'w-24',
     },
     lg: {
-      badge: 'px-3 py-1.5 text-sm font-bold',
+      badge: 'px-3 py-1.5 text-sm font-bold whitespace-nowrap',
       barHeight: 'h-2',
       width: 'w-32',
     },
   }
 
   return (
-    <div className={cn('inline-flex flex-col gap-1', className)}>
-      <div className="flex items-center justify-between gap-2">
+    <div className={cn('inline-flex flex-col items-end gap-1 shrink-0', className)}>
+      <div className="flex items-center gap-1.5 whitespace-nowrap">
         <span
           className={cn(
-            'inline-flex items-center rounded-md border font-mono tracking-tight',
+            'inline-flex items-center rounded-md border font-mono tracking-tight whitespace-nowrap',
             getColorClass(normalizedScore),
             sizeStyles[size].badge
           )}
@@ -60,7 +60,7 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
           {normalizedScore}% Match
         </span>
         {showLabel && (
-          <span className="text-[11px] text-text-muted hidden sm:inline">
+          <span className="text-[11px] text-text-muted hidden sm:inline whitespace-nowrap">
             {normalizedScore >= 80 ? 'High Intent' : normalizedScore >= 50 ? 'Moderate' : 'Low Match'}
           </span>
         )}
