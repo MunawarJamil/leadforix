@@ -1,6 +1,5 @@
 import * as React from 'react'
-import { Plus, Tag } from 'lucide-react'
-import { Chip } from '@/components/ui/chip'
+import { Check, Plus, Sparkles, Tag, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface SkillTagPickerProps {
@@ -9,6 +8,8 @@ export interface SkillTagPickerProps {
   value: string[]
   onChange: (tags: string[]) => void
   suggestions?: string[]
+  categorizedSuggestions?: { category: string; items: string[] }[]
+  suggestionsLabel?: string
   placeholder?: string
   error?: string
   maxTags?: number
@@ -21,6 +22,8 @@ export const SkillTagPicker: React.FC<SkillTagPickerProps> = ({
   value = [],
   onChange,
   suggestions = [],
+  categorizedSuggestions,
+  suggestionsLabel,
   placeholder = 'Type and press Enter...',
   error,
   maxTags = 20,
@@ -57,50 +60,95 @@ export const SkillTagPicker: React.FC<SkillTagPickerProps> = ({
     }
   }
 
+  const renderSuggestionPill = (sug: string) => {
+    const isSelected = value.some(
+      (v) => v.toLowerCase() === sug.toLowerCase()
+    )
+    return (
+      <button
+        key={sug}
+        type="button"
+        onClick={() => {
+          if (isSelected) {
+            const idx = value.findIndex(
+              (v) => v.toLowerCase() === sug.toLowerCase()
+            )
+            if (idx !== -1) handleRemoveTag(idx)
+          } else {
+            handleAddTag(sug)
+          }
+        }}
+        className={cn(
+          'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-200 select-none group',
+          isSelected
+            ? 'border-accent/60 bg-accent/20 text-accent font-semibold shadow-sm shadow-accent/20 ring-1 ring-accent/30'
+            : 'border-zinc-800/90 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/80'
+        )}
+      >
+        {isSelected ? (
+          <Check className="w-3 h-3 text-accent shrink-0" />
+        ) : (
+          <Plus className="w-3 h-3 text-zinc-500 group-hover:text-zinc-300 shrink-0" />
+        )}
+        <span>{sug}</span>
+      </button>
+    )
+  }
+
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-3', className)}>
       {label && (
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-text-primary flex items-center gap-1.5">
+          <label className="text-sm font-semibold text-zinc-200 flex items-center gap-1.5">
             <Tag className="w-3.5 h-3.5 text-accent" />
             <span>{label}</span>
           </label>
           {maxTags && (
-            <span className="text-xs text-text-muted">
-              {value.length}/{maxTags}
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
+              {value.length} / {maxTags} max
             </span>
           )}
         </div>
       )}
       {description && (
-        <p className="text-xs text-text-secondary">{description}</p>
+        <p className="text-xs text-zinc-400 leading-relaxed -mt-1">{description}</p>
       )}
 
       {/* Tags Input Container */}
       <div
         onClick={() => inputRef.current?.focus()}
         className={cn(
-          'min-h-[46px] w-full rounded-lg border bg-surface px-3 py-2 text-sm',
-          'flex flex-wrap items-center gap-1.5 cursor-text transition-all duration-200',
-          'focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20',
-          error ? 'border-error focus-within:border-error focus-within:ring-error/20' : 'border-border'
+          'min-h-[46px] w-full rounded-xl border bg-zinc-950/70 backdrop-blur-md px-3 py-2 text-sm',
+          'flex flex-wrap items-center gap-2 cursor-text transition-all duration-200',
+          'border-zinc-800/80 hover:border-zinc-700',
+          'focus-within:border-accent/70 focus-within:ring-2 focus-within:ring-accent/20 focus-within:bg-zinc-900/50 shadow-inner',
+          error ? 'border-error focus-within:border-error focus-within:ring-error/20' : ''
         )}
       >
         {/* Selected Chips */}
         {value.map((tag, idx) => (
-          <Chip
+          <span
             key={`${tag}-${idx}`}
-            variant="active"
-            size="sm"
-            onRemove={() => handleRemoveTag(idx)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-accent/40 bg-accent/15 text-accent font-semibold text-xs shadow-sm shadow-accent/10 transition-all animate-fade-in"
           >
-            {tag}
-          </Chip>
+            <span>{tag}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleRemoveTag(idx)
+              }}
+              className="rounded-md p-0.5 hover:bg-accent/25 text-accent/80 hover:text-white transition-colors ml-0.5"
+              title={`Remove ${tag}`}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </span>
         ))}
 
         {/* Dynamic Inline Input */}
         {value.length < maxTags && (
-          <div className="flex items-center flex-1 min-w-[120px]">
+          <div className="flex items-center flex-1 min-w-[150px]">
             <input
               ref={inputRef}
               type="text"
@@ -112,19 +160,9 @@ export const SkillTagPicker: React.FC<SkillTagPickerProps> = ({
                   handleAddTag(inputValue)
                 }
               }}
-              placeholder={value.length === 0 ? placeholder : ''}
-              className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+              placeholder={value.length === 0 ? placeholder : 'Add another title / skill...'}
+              className="w-full bg-transparent text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
-            {inputValue.trim() && (
-              <button
-                type="button"
-                onClick={() => handleAddTag(inputValue)}
-                className="shrink-0 p-1 text-accent hover:text-accent-hover rounded-md hover:bg-surface-hover transition-colors"
-                title="Add tag"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -132,41 +170,45 @@ export const SkillTagPicker: React.FC<SkillTagPickerProps> = ({
       {/* Validation Error Message */}
       {error && <p className="text-xs text-error mt-1">{error}</p>}
 
-      {/* Suggested Quick-Picks */}
-      {suggestions.length > 0 && (
-        <div className="pt-1">
-          <p className="text-[11px] uppercase tracking-wider text-text-muted font-mono mb-1.5">
-            Suggested Tech Stacks:
-          </p>
+      {/* Categorized Suggestions if provided */}
+      {categorizedSuggestions && categorizedSuggestions.length > 0 && (
+        <div className="pt-2 space-y-3 rounded-xl p-3 bg-zinc-950/40 border border-zinc-900">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
+            <span className="uppercase tracking-wider font-semibold">
+              {suggestionsLabel || 'Recommended Stacks & Frameworks:'}
+            </span>
+          </div>
+          <div className="space-y-2.5">
+            {categorizedSuggestions.map((cat) => (
+              <div key={cat.category} className="space-y-1.5">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
+                  {cat.category}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {cat.items.map(renderSuggestionPill)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Flat Suggested Quick-Picks if no categories */}
+      {!categorizedSuggestions && suggestions.length > 0 && (
+        <div className="pt-1.5">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 mb-2">
+            <Sparkles className="w-3 h-3 text-accent" />
+            <span className="uppercase tracking-wider font-semibold">
+              {suggestionsLabel || 'Quick Suggestions:'}
+            </span>
+          </div>
           <div className="flex flex-wrap gap-1.5">
-            {suggestions.map((sug) => {
-              const isSelected = value.some(
-                (v) => v.toLowerCase() === sug.toLowerCase()
-              )
-              return (
-                <Chip
-                  key={sug}
-                  size="sm"
-                  variant={isSelected ? 'active' : 'default'}
-                  onClick={() => {
-                    if (isSelected) {
-                      const idx = value.findIndex(
-                        (v) => v.toLowerCase() === sug.toLowerCase()
-                      )
-                      if (idx !== -1) handleRemoveTag(idx)
-                    } else {
-                      handleAddTag(sug)
-                    }
-                  }}
-                  className="cursor-pointer hover:border-accent/50"
-                >
-                  {sug}
-                </Chip>
-              )
-            })}
+            {suggestions.map(renderSuggestionPill)}
           </div>
         </div>
       )}
     </div>
   )
 }
+

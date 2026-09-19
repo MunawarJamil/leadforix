@@ -56,9 +56,9 @@ export const Topbar: React.FC<TopbarProps> = ({ onMobileMenuToggle }) => {
           <span className="w-1.5 h-1.5 rounded-full bg-accent absolute top-2 right-2" />
         </button>
 
-        {/* Avatar Placeholder */}
-        <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-xs font-bold text-accent">
-          MJ
+        {/* Avatar Placeholder for Munawar Minhas */}
+        <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-xs font-bold text-accent" title="Munawar Minhas">
+          MM
         </div>
       </div>
     </header>
